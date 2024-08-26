@@ -1,12 +1,92 @@
 let timers = [];
 let currentPage = 0;
+<<<<<<< HEAD
+=======
+let observer;
+
+function createTimer() {
+    return {
+        seconds: 0,
+        isRunning: false,
+        interval: null
+    };
+}
+
+function formatTime(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return [minutes, seconds].map(v => v < 10 ? "0" + v : v).join(":");
+}
+
+function updateDisplay(index) {
+    const timerElement = document.querySelector(`.timer-page[data-index="${index}"] .timer`);
+    if (timerElement) {
+        timerElement.textContent = formatTime(timers[index].seconds);
+    }
+}
+
+function startTimer(index) {
+    if (!timers[index].isRunning) {
+        timers[index].isRunning = true;
+        timers[index].interval = setInterval(() => {
+            if (timers[index].seconds > 0) {
+                timers[index].seconds--;
+                updateDisplay(index);
+            } else {
+                clearInterval(timers[index].interval);
+                timers[index].isRunning = false;
+                alert(`Timer ${index + 1} finished!`);
+            }
+        }, 1000);
+    }
+}
+
+function pauseTimer(index) {
+    clearInterval(timers[index].interval);
+    timers[index].isRunning = false;
+}
+
+function resetTimer(index) {
+    clearInterval(timers[index].interval);
+    timers[index].isRunning = false;
+    timers[index].seconds = 0;
+    updateDisplay(index);
+}
+
+function createTimerPage(index) {
+    const timerPage = document.createElement('div');
+    timerPage.className = 'timer-page';
+    timerPage.dataset.index = index;
+    timerPage.innerHTML = `
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <div class="timer-title" contenteditable="true">Timer ${index + 1}</div>
+        <div class="timer" contenteditable="true">00:00</div>
+        <div class="controls">
+            <button class="startBtn" title="Start Timer"><i class="fas fa-play"></i></button>
+            <button class="pauseBtn" title="Pause Timer"><i class="fas fa-pause"></i></button>
+            <button class="resetBtn" title="Reset Timer"><i class="fas fa-undo"></i></button>
+        </div>
+    `;
+
+    timerPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(index));
+    timerPage.querySelector('.startBtn').addEventListener('click', () => startTimer(index));
+    timerPage.querySelector('.pauseBtn').addEventListener('click', () => pauseTimer(index));
+    timerPage.querySelector('.resetBtn').addEventListener('click', () => resetTimer(index));
+    timerPage.querySelector('.timer').addEventListener('input', (e) => {
+        const time = e.target.textContent.split(':').map(Number);
+        timers[index].seconds = time[0] * 60 + time[1];
+    });
+
+    return timerPage;
+}
+>>>>>>> parent of 876326b (Categorized hamburger menu buttons)
 
 function createSideBySideTimerPage() {
     console.log(`Creating side-by-side timer page`);
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side';
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="删除">&times;</button>
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
                 <div class="timer-title left" contenteditable="true">正方</div>
@@ -14,11 +94,19 @@ function createSideBySideTimerPage() {
             </div>
             <div class="controls-space">
                 <div class="controls">
+<<<<<<< HEAD
                     <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
                     <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
                     <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
                     <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
                     <button class="reverseBtn" title="切换"><i class="fas fa-exchange-alt"></i></button>
+=======
+                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
+                    <button class="reverseBtn" title="Switch Active Timer"><i class="fas fa-sync"></i></button>
+                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+>>>>>>> parent of 876326b (Categorized hamburger menu buttons)
                 </div>
             </div>
             <div class="timer-right-space">
@@ -47,7 +135,7 @@ function createSideBySideTimerWithoutReverse() {
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side without-reverse';
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="删除">&times;</button>
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
                 <div class="timer-title left" contenteditable="true">正方</div>
@@ -55,10 +143,10 @@ function createSideBySideTimerWithoutReverse() {
             </div>
             <div class="controls-space">
                 <div class="controls">
-                    <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
-                    <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
-                    <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
+                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
             <div class="timer-right-space">
