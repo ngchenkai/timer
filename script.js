@@ -211,7 +211,7 @@ function createSideBySideTimerWithoutReverse() {
         <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
-                <div class="timer-title left" contenteditable="true">Left Timer</div>
+                <div class="timer-title left" contenteditable="true">正方</div>
                 <div class="timer left" contenteditable="true">00:00</div>
             </div>
             <div class="controls-space">
@@ -223,7 +223,7 @@ function createSideBySideTimerWithoutReverse() {
                 </div>
             </div>
             <div class="timer-right-space">
-                <div class="timer-title right" contenteditable="true">Right Timer</div>
+                <div class="timer-title right" contenteditable="true">反方</div>
                 <div class="timer right" contenteditable="true">00:00</div>
             </div>
         </div>
@@ -374,8 +374,11 @@ function toggleMenu(force) {
 }
 
 function initialize() {
-    addTimer();
-    
+    // Add the default side-by-side timer without reverse button
+    const defaultTimer = createSideBySideTimerWithoutReverse();
+    document.getElementById('timerContainer').appendChild(defaultTimer);
+    updatePageIndicator();
+
     document.getElementById('addTimerBtn').addEventListener('click', () => {
         addTimer();
         toggleMenu();
