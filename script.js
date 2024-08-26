@@ -198,6 +198,9 @@ function createSideBySideTimerPage() {
         });
     });
 
+    timerPage.leftTimer = leftTimer;
+    timerPage.rightTimer = rightTimer;
+
     return timerPage;
 }
 
@@ -304,6 +307,15 @@ function initialize() {
 
     // Initial update of the page indicator
     updateCurrentPage();
+
+    document.getElementById('saveConfigBtn').addEventListener('click', () => {
+        saveConfiguration();
+        toggleMenu(false);
+    });
+    document.getElementById('loadConfigBtn').addEventListener('click', () => {
+        loadConfiguration();
+        toggleMenu(false);
+    });
 }
 
 // Call initialize when the DOM is fully loaded
@@ -370,4 +382,112 @@ function addSideBySideTimer() {
     document.getElementById('timerContainer').appendChild(sideBySideTimerPage);
     updatePageIndicator();
     scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
+}
+
+function saveConfiguration() {
+    const timerPages = document.querySelectorAll('.timer-page');
+    const config = [];
+
+    timerPages.forEach((page, index) => {
+        const isSideBySide = page.classList.contains('side-by-side');
+        const timerConfig = {
+            type: isSideBySide ? 'side-by-side' : 'single',
+            titles: [],
+            values: []
+        };
+
+        if (isSideBySide) {
+            timerConfig.titles = [
+                page.querySelector('.timer-title.left').textContent,
+                page.querySelector('.timer-title.right').textContent
+            ];
+            timerConfig.values = [
+                page.querySelector('.timer.left').textContent,
+                page.querySelector('.timer.right').textContent
+            ];
+        } else {
+            timerConfig.titles = [page.querySelector('.timer-title').textContent];
+            timerConfig.values = [page.querySelector('.timer').textContent];
+        }
+
+        config.push(timerConfig);
+    });
+
+    const jsonConfig = JSON.stringify(config, null, 2);
+    const blob = new Blob([jsonConfig], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'timer_configuration.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function loadConfiguration() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    applyConfiguration(config);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    alert('Invalid configuration file');
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+    input.click();
+}
+
+function applyConfiguration(config) {
+    // Clear existing timers
+    const timerContainer = document.getElementById('timerContainer');
+    timerContainer.innerHTML = '';
+    timers = [];
+
+    config.forEach((timerConfig, index) => {
+        if (timerConfig.type === 'single') {
+            const timerPage = createTimerPage(index);
+            timerContainer.appendChild(timerPage);
+            timers.push(createTimer());
+
+            const titleElement = timerPage.querySelector('.timer-title');
+            const timerElement = timerPage.querySelector('.timer');
+            titleElement.textContent = timerConfig.titles[0];
+            timerElement.textContent = timerConfig.values[0];
+
+            // Update the timer object
+            const time = timerConfig.values[0].split(':').map(Number);
+            timers[index].seconds = time[0] * 60 + time[1];
+        } else if (timerConfig.type === 'side-by-side') {
+            const timerPage = createSideBySideTimerPage();
+            timerContainer.appendChild(timerPage);
+
+            const leftTitleElement = timerPage.querySelector('.timer-title.left');
+            const rightTitleElement = timerPage.querySelector('.timer-title.right');
+            const leftTimerElement = timerPage.querySelector('.timer.left');
+            const rightTimerElement = timerPage.querySelector('.timer.right');
+
+            leftTitleElement.textContent = timerConfig.titles[0];
+            rightTitleElement.textContent = timerConfig.titles[1];
+            leftTimerElement.textContent = timerConfig.values[0];
+            rightTimerElement.textContent = timerConfig.values[1];
+
+            // Update the timer objects (you'll need to modify createSideBySideTimerPage to expose these)
+            const leftTime = timerConfig.values[0].split(':').map(Number);
+            const rightTime = timerConfig.values[1].split(':').map(Number);
+            timerPage.leftTimer.seconds = leftTime[0] * 60 + leftTime[1];
+            timerPage.rightTimer.seconds = rightTime[0] * 60 + rightTime[1];
+        }
+    });
+
+    updatePageIndicator();
+    scrollToTimer(0);
 }
