@@ -1,6 +1,5 @@
 let timers = [];
 let currentPage = 0;
-
 let observer;
 
 function createTimer() {
@@ -31,16 +30,10 @@ function startTimer(index) {
             if (timers[index].seconds > 0) {
                 timers[index].seconds--;
                 updateDisplay(index);
-                if (timers[index].seconds === 30) {
-                    console.log('Timer hit 30 seconds, playing warning sound');
-                    play30SecWarningSound();
-                }
-                if (timers[index].seconds === 0) {
-                    playTimerSound();
-                    clearInterval(timers[index].interval);
-                    timers[index].isRunning = false;
-                    console.log(`Timer ${index + 1} finished!`);
-                }
+            } else {
+                clearInterval(timers[index].interval);
+                timers[index].isRunning = false;
+                alert(`Timer ${index + 1} finished!`);
             }
         }, 1000);
     }
@@ -86,7 +79,6 @@ function createTimerPage(index) {
 }
 
 function createSideBySideTimerPage() {
-    console.log(`Creating side-by-side timer page`);
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side';
     timerPage.innerHTML = `
@@ -113,28 +105,113 @@ function createSideBySideTimerPage() {
     `;
 
     timerPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(timerPage));
-    
-    const leftTimer = createTimer();
-    const rightTimer = createTimer();
 
-    timerPage.querySelector('.leftBtn').addEventListener('click', () => startTimer(leftTimer, timerPage, 'left'));
-    timerPage.querySelector('.rightBtn').addEventListener('click', () => startTimer(rightTimer, timerPage, 'right'));
-    timerPage.querySelector('.pauseBtn').addEventListener('click', () => pauseTimers(leftTimer, rightTimer));
-    timerPage.querySelector('.resetBtn').addEventListener('click', () => resetTimers(leftTimer, rightTimer, timerPage));
-    timerPage.querySelector('.reverseBtn').addEventListener('click', () => reverseTimers(leftTimer, rightTimer, timerPage));
+    const leftTimer = { seconds: 0, isRunning: false, interval: null };
+    const rightTimer = { seconds: 0, isRunning: false, interval: null };
+
+    function updateDisplay(timer, side) {
+        const timerElement = timerPage.querySelector(`.timer.${side}`);
+        timerElement.textContent = formatTime(timer.seconds);
+    }
+
+    function hideDirectionButtons() {
+        leftBtn.style.display = 'none';
+        rightBtn.style.display = 'none';
+    }
+
+    function showDirectionButtons() {
+        leftBtn.style.display = '';
+        rightBtn.style.display = '';
+    }
+
+    function startTimer(timer, side) {
+        if (!timer.isRunning && timer.seconds > 0) {
+            timer.isRunning = true;
+            timer.interval = setInterval(() => {
+                if (timer.seconds > 0) {
+                    timer.seconds--;
+                    updateDisplay(timer, side);
+                } else {
+                    clearInterval(timer.interval);
+                    timer.isRunning = false;
+                    // Start the other timer automatically
+                    if (side === 'left') {
+                        startTimer(rightTimer, 'right');
+                    } else {
+                        startTimer(leftTimer, 'left');
+                    }
+                }
+            }, 1000);
+            hideDirectionButtons();
+        }
+    }
+
+    function stopTimer(timer) {
+        clearInterval(timer.interval);
+        timer.isRunning = false;
+    }
+
+    function pauseTimers() {
+        stopTimer(leftTimer);
+        stopTimer(rightTimer);
+        showDirectionButtons(); // This will unhide left and right buttons when pause is clicked
+    }
+
+    function reverseTimers() {
+        if (leftTimer.isRunning) {
+            stopTimer(leftTimer);
+            startTimer(rightTimer, 'right');
+        } else if (rightTimer.isRunning) {
+            stopTimer(rightTimer);
+            startTimer(leftTimer, 'left');
+        }
+    }
+
+    function resetTimers() {
+        [leftTimer, rightTimer].forEach((timer, index) => {
+            stopTimer(timer);
+            timer.seconds = 0;
+            updateDisplay(timer, index === 0 ? 'left' : 'right');
+        });
+        showDirectionButtons();
+    }
+
+    const controls = timerPage.querySelector('.controls');
+    const leftBtn = controls.querySelector('.leftBtn');
+    const reverseBtn = controls.querySelector('.reverseBtn');
+    const pauseBtn = controls.querySelector('.pauseBtn');
+    const resetBtn = controls.querySelector('.resetBtn');
+    const rightBtn = controls.querySelector('.rightBtn');
+
+    leftBtn.addEventListener('click', () => startTimer(leftTimer, 'left'));
+    reverseBtn.addEventListener('click', reverseTimers);
+    pauseBtn.addEventListener('click', pauseTimers);
+    resetBtn.addEventListener('click', resetTimers);
+    rightBtn.addEventListener('click', () => startTimer(rightTimer, 'right'));
+
+    timerPage.querySelectorAll('.timer').forEach((timerElement, index) => {
+        timerElement.addEventListener('input', (e) => {
+            const time = e.target.textContent.split(':').map(Number);
+            const timer = index === 0 ? leftTimer : rightTimer;
+            timer.seconds = (time[0] || 0) * 60 + (time[1] || 0);
+            updateDisplay(timer, index === 0 ? 'left' : 'right');
+        });
+    });
+
+    timerPage.leftTimer = leftTimer;
+    timerPage.rightTimer = rightTimer;
 
     return timerPage;
 }
 
 function createSideBySideTimerWithoutReverse() {
-    console.log(`Creating side-by-side timer without reverse`);
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side without-reverse';
     timerPage.innerHTML = `
         <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
-                <div class="timer-title left" contenteditable="true">正方</div>
+                <div class="timer-title left" contenteditable="true">Left Timer</div>
                 <div class="timer left" contenteditable="true">00:00</div>
             </div>
             <div class="controls-space">
@@ -146,7 +223,7 @@ function createSideBySideTimerWithoutReverse() {
                 </div>
             </div>
             <div class="timer-right-space">
-                <div class="timer-title right" contenteditable="true">反方</div>
+                <div class="timer-title right" contenteditable="true">Right Timer</div>
                 <div class="timer right" contenteditable="true">00:00</div>
             </div>
         </div>
@@ -157,12 +234,7 @@ function createSideBySideTimerWithoutReverse() {
 
     function updateDisplay(timer, side) {
         const timerElement = timerPage.querySelector(`.timer.${side}`);
-        const formattedTime = formatTime(timer.seconds);
-        timerElement.textContent = formattedTime;
-        timerElement.style.color = timer.seconds < 10 ? 'red' : '';
-        if (timer.seconds === 0) {
-            playTimerSound();
-        }
+        timerElement.textContent = formatTime(timer.seconds);
     }
 
     function startTimer(timer, side) {
@@ -172,20 +244,9 @@ function createSideBySideTimerWithoutReverse() {
                 if (timer.seconds > 0) {
                     timer.seconds--;
                     updateDisplay(timer, side);
-                    if (timer.seconds === 30) {
-                        play30SecWarningSound();
-                    }
-                    if (timer.seconds === 0) {
-                        playTimerSound();
-                        clearInterval(timer.interval);
-                        timer.isRunning = false;
-                        // Start the other timer automatically (for side-by-side with reverse)
-                        if (side === 'left' && rightTimer.seconds > 0) {
-                            startTimer(rightTimer, 'right');
-                        } else if (side === 'right' && leftTimer.seconds > 0) {
-                            startTimer(leftTimer, 'left');
-                        }
-                    }
+                } else {
+                    clearInterval(timer.interval);
+                    timer.isRunning = false;
                 }
             }, 1000);
         }
@@ -245,36 +306,18 @@ function updatePageIndicator() {
         indicator.addEventListener('click', () => scrollToTimer(index));
         pageIndicator.appendChild(indicator);
     });
-    console.log(`Page indicator updated. Total indicators: ${timerPages.length}`);
-}
-
-function scrollToBottom() {
-    const timerContainer = document.getElementById('timerContainer');
-    setTimeout(() => {
-        timerContainer.scrollTo({
-            top: timerContainer.scrollHeight,
-            behavior: 'smooth'
-        });
-        // Update currentPage and page indicator after scrolling
-        setTimeout(() => {
-            currentPage = timers.length - 1;
-            updatePageIndicator();
-        }, 500);
-    }, 0);
 }
 
 function scrollToTimer(index) {
     const timerContainer = document.getElementById('timerContainer');
     const timerPages = document.querySelectorAll('.timer-page');
     if (timerPages[index]) {
-        setTimeout(() => {
-            timerPages[index].scrollIntoView({ behavior: 'smooth' });
-            // Update currentPage and page indicator after scrolling
-            setTimeout(() => {
-                currentPage = index;
-                updatePageIndicator();
-            }, 500);
-        }, 0);
+        timerContainer.scrollTo({
+            top: timerPages[index].offsetTop,
+            behavior: 'smooth'
+        });
+        // Update currentPage and page indicator after scrolling
+        setTimeout(updateCurrentPage, 500); // Adjust this delay if needed
     }
 }
 
@@ -285,152 +328,6 @@ function addTimer() {
     timers.push(createTimer());
     updatePageIndicator();
     scrollToTimer(index);
-}
-// te
-function startTimer(timer, timerPage, side) {
-    if (!timer.isRunning) {
-        timer.isRunning = true;
-        timer.interval = setInterval(() => {
-            if (timer.seconds > 0) {
-                timer.seconds--;
-                updateDisplay(timer, timerPage, side);
-                if (timer.seconds === 0) {
-                    clearInterval(timer.interval);
-                    timer.isRunning = false;
-                    playTimerSound();
-                }
-            }
-        }, 1000);
-    }
-}
-
-function pauseTimers(leftTimer, rightTimer) {
-    [leftTimer, rightTimer].forEach(timer => {
-        if (timer.isRunning) {
-            clearInterval(timer.interval);
-            timer.isRunning = false;
-        }
-    });
-}
-
-function resetTimers(leftTimer, rightTimer, timerPage) {
-    [leftTimer, rightTimer].forEach(timer => {
-        clearInterval(timer.interval);
-        timer.isRunning = false;
-        timer.seconds = 1; // Reset to 1 second (00:01)
-    });
-    updateDisplay(leftTimer, timerPage, 'left');
-    updateDisplay(rightTimer, timerPage, 'right');
-}
-
-function reverseTimers(leftTimer, rightTimer, timerPage) {
-    const leftSeconds = leftTimer.seconds;
-    const leftIsRunning = leftTimer.isRunning;
-    
-    leftTimer.seconds = rightTimer.seconds;
-    leftTimer.isRunning = rightTimer.isRunning;
-    
-    rightTimer.seconds = leftSeconds;
-    rightTimer.isRunning = leftIsRunning;
-    
-    updateDisplay(leftTimer, timerPage, 'left');
-    updateDisplay(rightTimer, timerPage, 'right');
-}
-
-function updateDisplay(timer, timerPage, side) {
-    const timerElement = timerPage.querySelector(`.timer.${side}`);
-    const formattedTime = formatTime(timer.seconds);
-    timerElement.textContent = formattedTime;
-    timerElement.style.color = timer.seconds < 10 ? 'red' : '';
-}
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
-
-function initialize() {
-    // Add the default side-by-side timer without reverse button
-    const defaultTimer = createSideBySideTimerWithoutReverse();
-    document.getElementById('timerContainer').appendChild(defaultTimer);
-    updatePageIndicator();
-
-    document.getElementById('addSideBySideTimerBtn').addEventListener('click', () => {
-        addSideBySideTimer();
-        toggleMenu();
-    });
-    document.getElementById('addSideBySideTimerWithoutReverseBtn').addEventListener('click', () => {
-        addSideBySideTimerWithoutReverse();
-        toggleMenu(false);
-    });
-    document.getElementById('addBackgroundBtn').addEventListener('click', () => {
-        setBackgroundImage();
-        toggleMenu(false);
-    });
-    document.getElementById('openMenuBtn').addEventListener('click', () => toggleMenu());
-    document.getElementById('closeMenuBtn').addEventListener('click', () => toggleMenu(false));
-    
-    // Add this line to handle clicks outside the menu
-    document.addEventListener('click', handleOutsideClick);
-
-    const timerContainer = document.getElementById('timerContainer');
-    timerContainer.addEventListener('scroll', updateCurrentPage);
-
-    // Initial update of the page indicator
-    updateCurrentPage();
-
-    document.getElementById('saveConfigBtn').addEventListener('click', () => {
-        saveConfiguration();
-        toggleMenu(false);
-    });
-    document.getElementById('loadConfigBtn').addEventListener('click', () => {
-        loadConfiguration();
-        toggleMenu(false);
-    });
-}
-
-// Call initialize when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', initialize);
-
-function toggleMenu(force) {
-    const hamburgerMenu = document.getElementById('hamburgerMenu');
-    if (force !== undefined) {
-        hamburgerMenu.classList.toggle('open', force);
-    } else {
-        hamburgerMenu.classList.toggle('open');
-    }
-}
-
-function handleOutsideClick(event) {
-    const hamburgerMenu = document.getElementById('hamburgerMenu');
-    const openMenuBtn = document.getElementById('openMenuBtn');
-    
-    if (hamburgerMenu.classList.contains('open') &&
-        !hamburgerMenu.contains(event.target) &&
-        event.target !== openMenuBtn) {
-        toggleMenu(false);
-    }
-}
-
-function updateCurrentPage() {
-    const timerContainer = document.getElementById('timerContainer');
-    const timerPages = document.querySelectorAll('.timer-page');
-    const containerRect = timerContainer.getBoundingClientRect();
-
-    let newCurrentPage = 0;
-    for (let i = 0; i < timerPages.length; i++) {
-        const timerRect = timerPages[i].getBoundingClientRect();
-        if (timerRect.top >= containerRect.top) {
-            newCurrentPage = i;
-            break;
-        }
-    }
-
-    if (currentPage !== newCurrentPage) {
-        currentPage = newCurrentPage;
-        updatePageIndicator();
-    }
 }
 
 function setBackgroundImage() {
@@ -465,6 +362,125 @@ function setBackgroundImage() {
         }
     };
     input.click();
+}
+
+function toggleMenu(force) {
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    if (force !== undefined) {
+        hamburgerMenu.classList.toggle('open', force);
+    } else {
+        hamburgerMenu.classList.toggle('open');
+    }
+}
+
+function initialize() {
+    addTimer();
+    
+    document.getElementById('addTimerBtn').addEventListener('click', () => {
+        addTimer();
+        toggleMenu();
+    });
+    document.getElementById('addSideBySideTimerBtn').addEventListener('click', () => {
+        addSideBySideTimer();
+        toggleMenu();
+    });
+    document.getElementById('addSideBySideTimerWithoutReverseBtn').addEventListener('click', () => {
+        const timerPage = createSideBySideTimerWithoutReverse();
+        document.getElementById('timerContainer').appendChild(timerPage);
+        updatePageIndicator();
+        scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
+        toggleMenu(false);
+    });
+    document.getElementById('addBackgroundBtn').addEventListener('click', () => {
+        setBackgroundImage();
+        toggleMenu(false);
+    });
+    document.getElementById('openMenuBtn').addEventListener('click', () => toggleMenu());
+    document.getElementById('closeMenuBtn').addEventListener('click', () => toggleMenu(false));
+    
+    // Add this line to handle clicks outside the menu
+    document.addEventListener('click', handleOutsideClick);
+
+    const timerContainer = document.getElementById('timerContainer');
+    timerContainer.addEventListener('scroll', updateCurrentPage);
+
+    // Initial update of the page indicator
+    updateCurrentPage();
+
+    document.getElementById('saveConfigBtn').addEventListener('click', () => {
+        saveConfiguration();
+        toggleMenu(false);
+    });
+    document.getElementById('loadConfigBtn').addEventListener('click', () => {
+        loadConfiguration();
+        toggleMenu(false);
+    });
+}
+
+// Call initialize when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', initialize);
+
+function deleteTimer(timerPageOrIndex) {
+    let timerPage;
+    if (typeof timerPageOrIndex === 'number') {
+        timerPage = document.querySelector(`.timer-page[data-index="${timerPageOrIndex}"]`);
+    } else {
+        timerPage = timerPageOrIndex;
+    }
+    
+    if (timerPage) {
+        timerPage.remove();
+        updateTimerIndices();
+        updatePageIndicator();
+        if (currentPage >= document.querySelectorAll('.timer-page').length) {
+            currentPage = Math.max(0, document.querySelectorAll('.timer-page').length - 1);
+            scrollToTimer(currentPage);
+        }
+    }
+}
+
+function updateTimerIndices() {
+    document.querySelectorAll('.timer-page').forEach((page, index) => {
+        page.dataset.index = index;
+    });
+}
+
+function updateCurrentPage() {
+    const timerContainer = document.getElementById('timerContainer');
+    const timerPages = document.querySelectorAll('.timer-page');
+    const containerHeight = timerContainer.clientHeight;
+    const scrollTop = timerContainer.scrollTop;
+
+    let newCurrentPage = 0;
+    for (let i = 0; i < timerPages.length; i++) {
+        if (scrollTop < timerPages[i].offsetTop + timerPages[i].offsetHeight / 2) {
+            newCurrentPage = i;
+            break;
+        }
+    }
+
+    if (currentPage !== newCurrentPage) {
+        currentPage = newCurrentPage;
+        updatePageIndicator();
+    }
+}
+
+function handleOutsideClick(event) {
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const openMenuBtn = document.getElementById('openMenuBtn');
+    
+    if (hamburgerMenu.classList.contains('open') &&
+        !hamburgerMenu.contains(event.target) &&
+        event.target !== openMenuBtn) {
+        toggleMenu(false);
+    }
+}
+
+function addSideBySideTimer() {
+    const sideBySideTimerPage = createSideBySideTimerPage();
+    document.getElementById('timerContainer').appendChild(sideBySideTimerPage);
+    updatePageIndicator();
+    scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
 }
 
 function saveConfiguration() {
@@ -574,30 +590,4 @@ function applyConfiguration(config) {
 
     updatePageIndicator();
     scrollToTimer(0);
-}
-
-function playTimerSound() {
-    const audio = document.getElementById('timerSound');
-    if (!audio) {
-        return;
-    }
-    audio.play().then(() => {
-        setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-        }, 3000);
-    }).catch(error => {
-        console.error('Error playing audio:', error);
-    });
-}
-
-function play30SecWarningSound() {
-    const audio = document.getElementById('timer30SecSound');
-    if (!audio) {
-        console.error('30-second warning audio element not found');
-        return;
-    }
-    audio.play().catch(error => {
-        console.error('Error playing 30-second warning audio:', error);
-    });
 }
