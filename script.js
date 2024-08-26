@@ -85,7 +85,7 @@ function createSideBySideTimerPage() {
         <button class="deleteBtn">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
-                <div class="timer-title left" contenteditable="true">Left Timer</div>
+                <div class="timer-title left" contenteditable="true">正方</div>
                 <div class="timer left" contenteditable="true">00:00</div>
             </div>
             <div class="controls-space">
@@ -98,7 +98,7 @@ function createSideBySideTimerPage() {
                 </div>
             </div>
             <div class="timer-right-space">
-                <div class="timer-title right" contenteditable="true">Right Timer</div>
+                <div class="timer-title right" contenteditable="true">反方</div>
                 <div class="timer right" contenteditable="true">00:00</div>
             </div>
         </div>
