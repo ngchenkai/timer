@@ -57,6 +57,7 @@ function createTimerPage(index) {
     timerPage.dataset.index = index;
     timerPage.innerHTML = `
         <button class="deleteBtn">&times;</button>
+        <div class="timer-title" contenteditable="true">Timer ${index + 1}</div>
         <div class="timer" contenteditable="true">00:00</div>
         <div class="controls">
             <button class="startBtn"><i class="fas fa-play"></i></button>
@@ -84,6 +85,7 @@ function createSideBySideTimerPage() {
         <button class="deleteBtn">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
+                <div class="timer-title left" contenteditable="true">Left Timer</div>
                 <div class="timer left" contenteditable="true">00:00</div>
             </div>
             <div class="controls-space">
@@ -96,6 +98,7 @@ function createSideBySideTimerPage() {
                 </div>
             </div>
             <div class="timer-right-space">
+                <div class="timer-title right" contenteditable="true">Right Timer</div>
                 <div class="timer right" contenteditable="true">00:00</div>
             </div>
         </div>
@@ -248,10 +251,19 @@ function setBackgroundImage() {
                     document.body.style.backgroundPosition = 'center';
                     document.body.style.backgroundRepeat = 'no-repeat';
                     document.body.style.backgroundAttachment = 'fixed';
+                    console.log('Background image set successfully');
+                };
+                img.onerror = function() {
+                    console.error('Error loading image');
                 };
                 img.src = e.target.result;
             };
+            reader.onerror = function() {
+                console.error('Error reading file');
+            };
             reader.readAsDataURL(file);
+        } else {
+            console.log('No file selected');
         }
     };
     input.click();
