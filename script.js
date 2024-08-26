@@ -19,7 +19,12 @@ function formatTime(totalSeconds) {
 function updateDisplay(index) {
     const timerElement = document.querySelector(`.timer-page[data-index="${index}"] .timer`);
     if (timerElement) {
-        timerElement.textContent = formatTime(timers[index].seconds);
+        const formattedTime = formatTime(timers[index].seconds);
+        timerElement.textContent = formattedTime;
+        timerElement.style.color = timers[index].seconds < 10 ? 'red' : '';
+        if (timers[index].seconds === 0) {
+            playTimerSound();
+        }
     }
 }
 
@@ -30,10 +35,12 @@ function startTimer(index) {
             if (timers[index].seconds > 0) {
                 timers[index].seconds--;
                 updateDisplay(index);
-            } else {
-                clearInterval(timers[index].interval);
-                timers[index].isRunning = false;
-                alert(`Timer ${index + 1} finished!`);
+                if (timers[index].seconds === 0) {
+                    playTimerSound();
+                    clearInterval(timers[index].interval);
+                    timers[index].isRunning = false;
+                    console.log(`Timer ${index + 1} finished!`);
+                }
             }
         }, 1000);
     }
@@ -91,7 +98,7 @@ function createSideBySideTimerPage() {
             <div class="controls-space">
                 <div class="controls">
                     <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
-                    <button class="reverseBtn" title="Switch Active Timer"><i class="fas fa-sync"></i></button>
+                    <button class="reverseBtn" title="切换"><i class="fas fa-sync"></i></button>
                     <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
                     <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
                     <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
@@ -111,7 +118,12 @@ function createSideBySideTimerPage() {
 
     function updateDisplay(timer, side) {
         const timerElement = timerPage.querySelector(`.timer.${side}`);
-        timerElement.textContent = formatTime(timer.seconds);
+        const formattedTime = formatTime(timer.seconds);
+        timerElement.textContent = formattedTime;
+        timerElement.style.color = timer.seconds < 10 ? 'red' : '';
+        if (timer.seconds === 0) {
+            playTimerSound();
+        }
     }
 
     function hideDirectionButtons() {
@@ -131,18 +143,20 @@ function createSideBySideTimerPage() {
                 if (timer.seconds > 0) {
                     timer.seconds--;
                     updateDisplay(timer, side);
-                } else {
-                    clearInterval(timer.interval);
-                    timer.isRunning = false;
-                    // Start the other timer automatically
-                    if (side === 'left') {
-                        startTimer(rightTimer, 'right');
-                    } else {
-                        startTimer(leftTimer, 'left');
+                    if (timer.seconds === 0) {
+                        playTimerSound();
+                        clearInterval(timer.interval);
+                        timer.isRunning = false;
+                        console.log(`${side} timer finished!`);
+                        // Start the other timer automatically (for side-by-side with reverse)
+                        if (side === 'left' && rightTimer.seconds > 0) {
+                            startTimer(rightTimer, 'right');
+                        } else if (side === 'right' && leftTimer.seconds > 0) {
+                            startTimer(leftTimer, 'left');
+                        }
                     }
                 }
             }, 1000);
-            hideDirectionButtons();
         }
     }
 
@@ -234,7 +248,12 @@ function createSideBySideTimerWithoutReverse() {
 
     function updateDisplay(timer, side) {
         const timerElement = timerPage.querySelector(`.timer.${side}`);
-        timerElement.textContent = formatTime(timer.seconds);
+        const formattedTime = formatTime(timer.seconds);
+        timerElement.textContent = formattedTime;
+        timerElement.style.color = timer.seconds < 10 ? 'red' : '';
+        if (timer.seconds === 0) {
+            playTimerSound();
+        }
     }
 
     function startTimer(timer, side) {
@@ -243,6 +262,9 @@ function createSideBySideTimerWithoutReverse() {
             timer.interval = setInterval(() => {
                 if (timer.seconds > 0) {
                     timer.seconds--;
+                    if (timer.seconds === 0) {
+                        playTimerSound();
+                    }
                     updateDisplay(timer, side);
                 } else {
                     clearInterval(timer.interval);
@@ -593,4 +615,22 @@ function applyConfiguration(config) {
 
     updatePageIndicator();
     scrollToTimer(0);
+}
+
+function playTimerSound() {
+    const audio = document.getElementById('timerSound');
+    if (!audio) {
+        console.error('Audio element not found');
+        return;
+    }
+    audio.play().then(() => {
+        console.log('Audio started playing');
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            console.log('Audio stopped');
+        }, 3000);
+    }).catch(error => {
+        console.error('Error playing audio:', error);
+    });
 }
