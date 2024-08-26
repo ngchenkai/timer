@@ -346,22 +346,31 @@ function scrollToTimer(index) {
     const timerContainer = document.getElementById('timerContainer');
     const timerPages = document.querySelectorAll('.timer-page');
     if (timerPages[index]) {
-        timerContainer.scrollTo({
-            top: timerPages[index].offsetTop,
-            behavior: 'smooth'
-        });
-        // Update currentPage and page indicator after scrolling
-        setTimeout(updateCurrentPage, 500); // Adjust this delay if needed
+        setTimeout(() => {
+            timerPages[index].scrollIntoView({ behavior: 'smooth' });
+            // Update currentPage and page indicator after scrolling
+            setTimeout(() => {
+                currentPage = index;
+                updatePageIndicator();
+            }, 500);
+        }, 0);
     }
 }
 
 function addTimer() {
-    const index = timers.length;
+    const index = document.querySelectorAll('.timer-page').length;
     const timerPage = createTimerPage(index);
     document.getElementById('timerContainer').appendChild(timerPage);
     timers.push(createTimer());
     updatePageIndicator();
     scrollToTimer(index);
+}
+
+function addSideBySideTimer() {
+    const sideBySideTimerPage = createSideBySideTimerPage();
+    document.getElementById('timerContainer').appendChild(sideBySideTimerPage);
+    updatePageIndicator();
+    scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
 }
 
 function setBackgroundImage() {
@@ -415,7 +424,7 @@ function initialize() {
 
     document.getElementById('addTimerBtn').addEventListener('click', () => {
         addTimer();
-        toggleMenu();
+        toggleMenu(false);
     });
     document.getElementById('addSideBySideTimerBtn').addEventListener('click', () => {
         addSideBySideTimer();
@@ -485,12 +494,12 @@ function updateTimerIndices() {
 function updateCurrentPage() {
     const timerContainer = document.getElementById('timerContainer');
     const timerPages = document.querySelectorAll('.timer-page');
-    const containerHeight = timerContainer.clientHeight;
-    const scrollTop = timerContainer.scrollTop;
+    const containerRect = timerContainer.getBoundingClientRect();
 
     let newCurrentPage = 0;
     for (let i = 0; i < timerPages.length; i++) {
-        if (scrollTop < timerPages[i].offsetTop + timerPages[i].offsetHeight / 2) {
+        const timerRect = timerPages[i].getBoundingClientRect();
+        if (timerRect.top >= containerRect.top) {
             newCurrentPage = i;
             break;
         }
@@ -511,13 +520,6 @@ function handleOutsideClick(event) {
         event.target !== openMenuBtn) {
         toggleMenu(false);
     }
-}
-
-function addSideBySideTimer() {
-    const sideBySideTimerPage = createSideBySideTimerPage();
-    document.getElementById('timerContainer').appendChild(sideBySideTimerPage);
-    updatePageIndicator();
-    scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
 }
 
 function saveConfiguration() {
