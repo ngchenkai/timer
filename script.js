@@ -59,9 +59,13 @@ function createTimerPage(index) {
     timerPage.dataset.index = index;
     timerPage.innerHTML = `
         <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-title" contenteditable="true">Timer ${index + 1}</div>
         <div class="timer" contenteditable="true">00:00</div>
         <div class="controls">
+            <button class="startBtn" title="Start Timer"><i class="fas fa-play"></i></button>
+            <button class="pauseBtn" title="Pause Timer"><i class="fas fa-pause"></i></button>
+            <button class="resetBtn" title="Reset Timer"><i class="fas fa-undo"></i></button>
             <button class="startBtn" title="Start Timer"><i class="fas fa-play"></i></button>
             <button class="pauseBtn" title="Pause Timer"><i class="fas fa-pause"></i></button>
             <button class="resetBtn" title="Reset Timer"><i class="fas fa-undo"></i></button>
@@ -96,10 +100,10 @@ function createSideBySideTimerPage() {
                 <div class="controls">
 <<<<<<< HEAD
 <<<<<<< HEAD
-                    <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
-                    <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
-                    <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
+                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
                     <button class="reverseBtn" title="切换"><i class="fas fa-exchange-alt"></i></button>
 =======
 =======
