@@ -299,7 +299,7 @@ function createSideBySideTimerWithoutReverse() {
     function resetTimers() {
         [leftTimer, rightTimer].forEach((timer, index) => {
             stopTimer(timer);
-            timer.seconds = 0;
+            timer.seconds = 1;
             updateDisplay(timer, index === 0 ? 'left' : 'right');
         });
     }
