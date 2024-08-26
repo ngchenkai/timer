@@ -95,17 +95,21 @@ function createSideBySideTimerPage() {
             <div class="controls-space">
                 <div class="controls">
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
                     <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
                     <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
                     <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
                     <button class="reverseBtn" title="切换"><i class="fas fa-exchange-alt"></i></button>
 =======
+=======
+>>>>>>> parent of 876326b (Categorized hamburger menu buttons)
                     <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
                     <button class="reverseBtn" title="Switch Active Timer"><i class="fas fa-sync"></i></button>
                     <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
                     <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
                     <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+<<<<<<< HEAD
 >>>>>>> parent of 876326b (Categorized hamburger menu buttons)
                 </div>
             </div>
@@ -147,6 +151,8 @@ function createSideBySideTimerWithoutReverse() {
                     <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
                     <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
                     <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+=======
+>>>>>>> parent of 876326b (Categorized hamburger menu buttons)
                 </div>
             </div>
             <div class="timer-right-space">
@@ -169,6 +175,7 @@ function createSideBySideTimerWithoutReverse() {
     return timerPage;
 }
 
+<<<<<<< HEAD
 function addSideBySideTimer() {
     const sideBySideTimerPage = createSideBySideTimerPage();
     document.getElementById('timerContainer').appendChild(sideBySideTimerPage);
@@ -177,6 +184,32 @@ function addSideBySideTimer() {
     scrollToBottom();
     console.log(`Side-by-side timer added. New timer count: ${timers.length}`);
 }
+=======
+function createSideBySideTimerWithoutReverse() {
+    const timerPage = document.createElement('div');
+    timerPage.className = 'timer-page side-by-side without-reverse';
+    timerPage.innerHTML = `
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <div class="timer-container">
+            <div class="timer-left-space">
+                <div class="timer-title left" contenteditable="true">正方</div>
+                <div class="timer left" contenteditable="true">00:00</div>
+            </div>
+            <div class="controls-space">
+                <div class="controls">
+                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="timer-right-space">
+                <div class="timer-title right" contenteditable="true">反方</div>
+                <div class="timer right" contenteditable="true">00:00</div>
+            </div>
+        </div>
+    `;
+>>>>>>> parent of 876326b (Categorized hamburger menu buttons)
 
 function addSideBySideTimerWithoutReverse() {
     const timerPage = createSideBySideTimerWithoutReverse();
