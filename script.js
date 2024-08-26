@@ -31,10 +31,16 @@ function startTimer(index) {
             if (timers[index].seconds > 0) {
                 timers[index].seconds--;
                 updateDisplay(index);
-            } else {
-                clearInterval(timers[index].interval);
-                timers[index].isRunning = false;
-                alert(`Timer ${index + 1} finished!`);
+                if (timers[index].seconds === 30) {
+                    console.log('Timer hit 30 seconds, playing warning sound');
+                    play30SecWarningSound();
+                }
+                if (timers[index].seconds === 0) {
+                    playTimerSound();
+                    clearInterval(timers[index].interval);
+                    timers[index].isRunning = false;
+                    console.log(`Timer ${index + 1} finished!`);
+                }
             }
         }, 1000);
     }
@@ -269,12 +275,13 @@ function scrollToTimer(index) {
     }
 }
 
-function createTimer() {
-    return {
-        seconds: 0,
-        isRunning: false,
-        interval: null
-    };
+function addTimer() {
+    const index = document.querySelectorAll('.timer-page').length;
+    const timerPage = createTimerPage(index);
+    document.getElementById('timerContainer').appendChild(timerPage);
+    timers.push(createTimer());
+    updatePageIndicator();
+    scrollToTimer(index);
 }
 
 function startTimer(timer, timerPage, side) {
@@ -530,6 +537,7 @@ function applyConfiguration(config) {
         if (timerConfig.type === 'single') {
             const timerPage = createTimerPage(index);
             timerContainer.appendChild(timerPage);
+            timers.push(createTimer());
 
             const titleElement = timerPage.querySelector('.timer-title');
             const timerElement = timerPage.querySelector('.timer');
