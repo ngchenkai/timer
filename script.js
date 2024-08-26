@@ -56,13 +56,13 @@ function createTimerPage(index) {
     timerPage.className = 'timer-page';
     timerPage.dataset.index = index;
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="删除">&times;</button>
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-title" contenteditable="true">Timer ${index + 1}</div>
         <div class="timer" contenteditable="true">00:00</div>
         <div class="controls">
-            <button class="startBtn" title="开始"><i class="fas fa-play"></i></button>
-            <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
-            <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
+            <button class="startBtn" title="Start Timer"><i class="fas fa-play"></i></button>
+            <button class="pauseBtn" title="Pause Timer"><i class="fas fa-pause"></i></button>
+            <button class="resetBtn" title="Reset Timer"><i class="fas fa-undo"></i></button>
         </div>
     `;
 
@@ -82,7 +82,7 @@ function createSideBySideTimerPage() {
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side';
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="删除">&times;</button>
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
                 <div class="timer-title left" contenteditable="true">正方</div>
@@ -90,11 +90,11 @@ function createSideBySideTimerPage() {
             </div>
             <div class="controls-space">
                 <div class="controls">
-                    <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
-                    <button class="reverseBtn" title="切换"><i class="fas fa-sync"></i></button>
-                    <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
-                    <button class="resetBtn" title="重启"><i class="fas fa-undo"></i></button>
-                    <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
+                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
+                    <button class="reverseBtn" title="Switch Active Timer"><i class="fas fa-sync"></i></button>
+                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
             <div class="timer-right-space">
@@ -204,6 +204,98 @@ function createSideBySideTimerPage() {
     return timerPage;
 }
 
+function createSideBySideTimerWithoutReverse() {
+    const timerPage = document.createElement('div');
+    timerPage.className = 'timer-page side-by-side without-reverse';
+    timerPage.innerHTML = `
+        <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <div class="timer-container">
+            <div class="timer-left-space">
+                <div class="timer-title left" contenteditable="true">Left Timer</div>
+                <div class="timer left" contenteditable="true">00:00</div>
+            </div>
+            <div class="controls-space">
+                <div class="controls">
+                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="timer-right-space">
+                <div class="timer-title right" contenteditable="true">Right Timer</div>
+                <div class="timer right" contenteditable="true">00:00</div>
+            </div>
+        </div>
+    `;
+
+    const leftTimer = { seconds: 0, isRunning: false, interval: null };
+    const rightTimer = { seconds: 0, isRunning: false, interval: null };
+
+    function updateDisplay(timer, side) {
+        const timerElement = timerPage.querySelector(`.timer.${side}`);
+        timerElement.textContent = formatTime(timer.seconds);
+    }
+
+    function startTimer(timer, side) {
+        if (!timer.isRunning && timer.seconds > 0) {
+            timer.isRunning = true;
+            timer.interval = setInterval(() => {
+                if (timer.seconds > 0) {
+                    timer.seconds--;
+                    updateDisplay(timer, side);
+                } else {
+                    clearInterval(timer.interval);
+                    timer.isRunning = false;
+                }
+            }, 1000);
+        }
+    }
+
+    function stopTimer(timer) {
+        clearInterval(timer.interval);
+        timer.isRunning = false;
+    }
+
+    function pauseTimers() {
+        stopTimer(leftTimer);
+        stopTimer(rightTimer);
+    }
+
+    function resetTimers() {
+        [leftTimer, rightTimer].forEach((timer, index) => {
+            stopTimer(timer);
+            timer.seconds = 0;
+            updateDisplay(timer, index === 0 ? 'left' : 'right');
+        });
+    }
+
+    const controls = timerPage.querySelector('.controls');
+    const leftBtn = controls.querySelector('.leftBtn');
+    const pauseBtn = controls.querySelector('.pauseBtn');
+    const resetBtn = controls.querySelector('.resetBtn');
+    const rightBtn = controls.querySelector('.rightBtn');
+
+    leftBtn.addEventListener('click', () => startTimer(leftTimer, 'left'));
+    pauseBtn.addEventListener('click', pauseTimers);
+    resetBtn.addEventListener('click', resetTimers);
+    rightBtn.addEventListener('click', () => startTimer(rightTimer, 'right'));
+
+    timerPage.querySelectorAll('.timer').forEach((timerElement, index) => {
+        timerElement.addEventListener('input', (e) => {
+            const time = e.target.textContent.split(':').map(Number);
+            const timer = index === 0 ? leftTimer : rightTimer;
+            timer.seconds = (time[0] || 0) * 60 + (time[1] || 0);
+            updateDisplay(timer, index === 0 ? 'left' : 'right');
+        });
+    });
+
+    timerPage.leftTimer = leftTimer;
+    timerPage.rightTimer = rightTimer;
+
+    return timerPage;
+}
+
 function updatePageIndicator() {
     const pageIndicator = document.getElementById('pageIndicator');
     pageIndicator.innerHTML = '';
@@ -291,6 +383,13 @@ function initialize() {
     document.getElementById('addSideBySideTimerBtn').addEventListener('click', () => {
         addSideBySideTimer();
         toggleMenu();
+    });
+    document.getElementById('addSideBySideTimerWithoutReverseBtn').addEventListener('click', () => {
+        const timerPage = createSideBySideTimerWithoutReverse();
+        document.getElementById('timerContainer').appendChild(timerPage);
+        updatePageIndicator();
+        scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
+        toggleMenu(false);
     });
     document.getElementById('addBackgroundBtn').addEventListener('click', () => {
         setBackgroundImage();
@@ -390,8 +489,9 @@ function saveConfiguration() {
 
     timerPages.forEach((page, index) => {
         const isSideBySide = page.classList.contains('side-by-side');
+        const isWithoutReverse = page.classList.contains('without-reverse');
         const timerConfig = {
-            type: isSideBySide ? 'side-by-side' : 'single',
+            type: isSideBySide ? (isWithoutReverse ? 'side-by-side-without-reverse' : 'side-by-side') : 'single',
             titles: [],
             values: []
         };
@@ -466,8 +566,9 @@ function applyConfiguration(config) {
             // Update the timer object
             const time = timerConfig.values[0].split(':').map(Number);
             timers[index].seconds = time[0] * 60 + time[1];
-        } else if (timerConfig.type === 'side-by-side') {
-            const timerPage = createSideBySideTimerPage();
+        } else if (timerConfig.type === 'side-by-side' || timerConfig.type === 'side-by-side-without-reverse') {
+            const timerPage = timerConfig.type === 'side-by-side' ? 
+                createSideBySideTimerPage() : createSideBySideTimerWithoutReverse();
             timerContainer.appendChild(timerPage);
 
             const leftTitleElement = timerPage.querySelector('.timer-title.left');
@@ -480,7 +581,6 @@ function applyConfiguration(config) {
             leftTimerElement.textContent = timerConfig.values[0];
             rightTimerElement.textContent = timerConfig.values[1];
 
-            // Update the timer objects (you'll need to modify createSideBySideTimerPage to expose these)
             const leftTime = timerConfig.values[0].split(':').map(Number);
             const rightTime = timerConfig.values[1].split(':').map(Number);
             timerPage.leftTimer.seconds = leftTime[0] * 60 + leftTime[1];
