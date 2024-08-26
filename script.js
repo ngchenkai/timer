@@ -283,7 +283,7 @@ function addTimer() {
     updatePageIndicator();
     scrollToTimer(index);
 }
-
+// te
 function startTimer(timer, timerPage, side) {
     if (!timer.isRunning) {
         timer.isRunning = true;
