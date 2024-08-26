@@ -36,14 +36,12 @@ function startTimer(index) {
                 timers[index].seconds--;
                 updateDisplay(index);
                 if (timers[index].seconds === 30) {
-                    console.log('Timer hit 30 seconds, playing warning sound');
                     play30SecWarningSound();
                 }
                 if (timers[index].seconds === 0) {
                     playTimerSound();
                     clearInterval(timers[index].interval);
                     timers[index].isRunning = false;
-                    console.log(`Timer ${index + 1} finished!`);
                 }
             }
         }, 1000);
@@ -148,14 +146,12 @@ function createSideBySideTimerPage() {
                     timer.seconds--;
                     updateDisplay(timer, side);
                     if (timer.seconds === 30) {
-                        console.log(`${side} timer hit 30 seconds, playing warning sound`);
                         play30SecWarningSound();
                     }
                     if (timer.seconds === 0) {
                         playTimerSound();
                         clearInterval(timer.interval);
                         timer.isRunning = false;
-                        console.log(`${side} timer finished!`);
                         // Start the other timer automatically (for side-by-side with reverse)
                         if (side === 'left' && rightTimer.seconds > 0) {
                             startTimer(rightTimer, 'right');
@@ -272,14 +268,12 @@ function createSideBySideTimerWithoutReverse() {
                     timer.seconds--;
                     updateDisplay(timer, side);
                     if (timer.seconds === 30) {
-                        console.log(`${side} timer hit 30 seconds, playing warning sound`);
                         play30SecWarningSound();
                     }
                     if (timer.seconds === 0) {
                         playTimerSound();
                         clearInterval(timer.interval);
                         timer.isRunning = false;
-                        console.log(`${side} timer finished!`);
                         // Start the other timer automatically (for side-by-side with reverse)
                         if (side === 'left' && rightTimer.seconds > 0) {
                             startTimer(rightTimer, 'right');
@@ -651,14 +645,12 @@ function playTimerSound() {
 }
 
 function play30SecWarningSound() {
-    console.log('Attempting to play 30-second warning sound');
     const audio = document.getElementById('timer30SecSound');
     if (!audio) {
         console.error('30-second warning audio element not found');
         return;
     }
     audio.play().then(() => {
-        console.log('30-second warning sound played successfully');
     }).catch(error => {
         console.error('Error playing 30-second warning audio:', error);
     });
