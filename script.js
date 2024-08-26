@@ -34,10 +34,11 @@ function startTimer(index) {
         timers[index].interval = setInterval(() => {
             if (timers[index].seconds > 0) {
                 timers[index].seconds--;
+                updateDisplay(index);
                 if (timers[index].seconds === 30) {
+                    console.log('Timer hit 30 seconds, playing warning sound');
                     play30SecWarningSound();
                 }
-                updateDisplay(index);
                 if (timers[index].seconds === 0) {
                     playTimerSound();
                     clearInterval(timers[index].interval);
@@ -145,10 +146,11 @@ function createSideBySideTimerPage() {
             timer.interval = setInterval(() => {
                 if (timer.seconds > 0) {
                     timer.seconds--;
+                    updateDisplay(timer, side);
                     if (timer.seconds === 30) {
+                        console.log(`${side} timer hit 30 seconds, playing warning sound`);
                         play30SecWarningSound();
                     }
-                    updateDisplay(timer, side);
                     if (timer.seconds === 0) {
                         playTimerSound();
                         clearInterval(timer.interval);
@@ -639,12 +641,15 @@ function playTimerSound() {
 }
 
 function play30SecWarningSound() {
+    console.log('Attempting to play 30-second warning sound');
     const audio = document.getElementById('timer30SecSound');
     if (!audio) {
         console.error('30-second warning audio element not found');
         return;
     }
-    audio.play().catch(error => {
+    audio.play().then(() => {
+        console.log('30-second warning sound played successfully');
+    }).catch(error => {
         console.error('Error playing 30-second warning audio:', error);
     });
 }
