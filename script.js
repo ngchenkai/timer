@@ -29,20 +29,21 @@ function updateDisplay(index) {
 }
 
 function startTimer(index) {
-    if (!timers[index].isRunning) {
-        timers[index].isRunning = true;
-        timers[index].interval = setInterval(() => {
-            if (timers[index].seconds > 0) {
-                timers[index].seconds--;
+    const timer = timers[index];
+    if (timer && !timer.isRunning) {
+        timer.isRunning = true;
+        timer.interval = setInterval(() => {
+            if (timer.seconds > 0) {
+                timer.seconds--;
                 updateDisplay(index);
-                if (timers[index].seconds === 30) {
+                if (timer.seconds === 30) {
                     console.log('Timer hit 30 seconds, playing warning sound');
                     play30SecWarningSound();
                 }
-                if (timers[index].seconds === 0) {
+                if (timer.seconds === 0) {
                     playTimerSound();
-                    clearInterval(timers[index].interval);
-                    timers[index].isRunning = false;
+                    clearInterval(timer.interval);
+                    timer.isRunning = false;
                     console.log(`Timer ${index + 1} finished!`);
                 }
             }
@@ -51,15 +52,21 @@ function startTimer(index) {
 }
 
 function pauseTimer(index) {
-    clearInterval(timers[index].interval);
-    timers[index].isRunning = false;
+    const timer = timers[index];
+    if (timer) {
+        clearInterval(timer.interval);
+        timer.isRunning = false;
+    }
 }
 
 function resetTimer(index) {
-    clearInterval(timers[index].interval);
-    timers[index].isRunning = false;
-    timers[index].seconds = 0;
-    updateDisplay(index);
+    const timer = timers[index];
+    if (timer) {
+        clearInterval(timer.interval);
+        timer.isRunning = false;
+        timer.seconds = 0;
+        updateDisplay(index);
+    }
 }
 
 function createTimerPage(index) {
@@ -76,6 +83,9 @@ function createTimerPage(index) {
             <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
         </div>
     `;
+
+    // Create the timer object immediately
+    timers[index] = createTimer();
 
     timerPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(index));
     timerPage.querySelector('.startBtn').addEventListener('click', () => startTimer(index));
@@ -358,10 +368,9 @@ function scrollToTimer(index) {
 }
 
 function addTimer() {
-    const index = document.querySelectorAll('.timer-page').length;
+    const index = timers.length;
     const timerPage = createTimerPage(index);
     document.getElementById('timerContainer').appendChild(timerPage);
-    timers.push(createTimer());
     updatePageIndicator();
     scrollToTimer(index);
 }
@@ -595,7 +604,6 @@ function applyConfiguration(config) {
         if (timerConfig.type === 'single') {
             const timerPage = createTimerPage(index);
             timerContainer.appendChild(timerPage);
-            timers.push(createTimer());
 
             const titleElement = timerPage.querySelector('.timer-title');
             const timerElement = timerPage.querySelector('.timer');
