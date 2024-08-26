@@ -600,4 +600,4 @@ function play30SecWarningSound() {
     audio.play().catch(error => {
         console.error('Error playing 30-second warning audio:', error);
     });
-}}
+}
