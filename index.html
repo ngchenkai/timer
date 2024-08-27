@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Timer</title>
+    <!-- Link to the main stylesheet -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Link to Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Hamburger menu for settings -->
     <div id="hamburgerMenu" class="hamburger-menu">
         <button id="closeMenuBtn">&times;</button>
         <h2>设置</h2>
+        <!-- Menu category for adding pages -->
         <div class="menu-category">
             <h3>添加页面</h3>
             <button id="addTimerBtn"><i class="fas fa-clock"></i> 单计时器</button>
@@ -18,20 +22,26 @@
             <button id="addSideBySideTimerWithoutReverseBtn"><i class="fas fa-columns"></i> 双计时器 (无切换)</button>
             <button id="addTestSoundPageBtn"><i class="fas fa-volume-up"></i> 铃声测试</button>
         </div>
+        <!-- Menu category for personalization -->
         <div class="menu-category">
             <h3>个性化</h3>
             <button id="addBackgroundBtn"><i class="fas fa-image"></i> 添加背景</button>
         </div>
+        <!-- Menu category for settings -->
         <div class="menu-category">
             <h3>设置</h3>
             <button id="saveConfigBtn"><i class="fas fa-save"></i> 保存设置</button>
             <button id="loadConfigBtn"><i class="fas fa-upload"></i> 载入设置</button>
         </div>
-        <!-- Add more settings options here -->
+        <!-- Placeholder for additional settings options -->
     </div>
+    <!-- Button to open the hamburger menu -->
     <button id="openMenuBtn" class="hamburger-icon">☰</button>
+    <!-- Container for all timer pages -->
     <div id="timerContainer"></div>
+    <!-- Page indicator for navigation -->
     <div id="pageIndicator"></div>
+    <!-- Link to the main JavaScript file -->
     <script src="script.js"></script>
 </body>
 </html>
