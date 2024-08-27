@@ -415,6 +415,14 @@ function initialize() {
         loadConfiguration();
         toggleMenu(false);
     });
+
+    document.getElementById('addTestSoundPageBtn').addEventListener('click', () => {
+        const testSoundPage = createTestSoundPage();
+        document.getElementById('timerContainer').appendChild(testSoundPage);
+        updatePageIndicator();
+        scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
+        toggleMenu(false);
+    });
 }
 
 // Call initialize when the DOM is fully loaded
@@ -590,4 +598,27 @@ function applyConfiguration(config) {
 
     updatePageIndicator();
     scrollToTimer(0);
+}
+
+function createTestSoundPage() {
+    const testSoundPage = document.createElement('div');
+    testSoundPage.className = 'timer-page test-sound-page';
+    testSoundPage.innerHTML = `
+        <button class="deleteBtn" title="Delete Page">&times;</button>
+        <div class="test-sound-container">
+            <button class="test-sound-btn" data-sound="/timer/timer-30sec.mp3">Play 30 Sec Sound</button>
+            <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">Play End Sound</button>
+        </div>
+    `;
+
+    testSoundPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(testSoundPage));
+
+    testSoundPage.querySelectorAll('.test-sound-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const audio = new Audio(btn.dataset.sound);
+            audio.play();
+        });
+    });
+
+    return testSoundPage;
 }
