@@ -618,8 +618,8 @@ function createTestSoundPage() {
     testSoundPage.innerHTML = `
         <button class="deleteBtn" title="Delete Page">&times;</button>
         <div class="test-sound-container">
-            <button class="test-sound-btn" data-sound="/timer/timer-30sec.mp3">Play 30 Sec Sound</button>
-            <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">Play End Sound</button>
+            <button class="test-sound-btn" data-sound="/timer/timer-30sec.mp3">30 Sec Sound</button>
+            <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">End Sound</button>
         </div>
     `;
 
