@@ -498,24 +498,33 @@ function saveConfiguration() {
     timerPages.forEach((page, index) => {
         const isSideBySide = page.classList.contains('side-by-side');
         const isWithoutReverse = page.classList.contains('without-reverse');
-        const timerConfig = {
-            type: isSideBySide ? (isWithoutReverse ? 'side-by-side-without-reverse' : 'side-by-side') : 'single',
-            titles: [],
-            values: []
-        };
+        const isTestSound = page.classList.contains('test-sound-page');
+        let timerConfig;
 
-        if (isSideBySide) {
-            timerConfig.titles = [
-                page.querySelector('.timer-title.left').textContent,
-                page.querySelector('.timer-title.right').textContent
-            ];
-            timerConfig.values = [
-                page.querySelector('.timer.left').textContent,
-                page.querySelector('.timer.right').textContent
-            ];
+        if (isTestSound) {
+            timerConfig = {
+                type: 'test-sound'
+            };
         } else {
-            timerConfig.titles = [page.querySelector('.timer-title').textContent];
-            timerConfig.values = [page.querySelector('.timer').textContent];
+            timerConfig = {
+                type: isSideBySide ? (isWithoutReverse ? 'side-by-side-without-reverse' : 'side-by-side') : 'single',
+                titles: [],
+                values: []
+            };
+
+            if (isSideBySide) {
+                timerConfig.titles = [
+                    page.querySelector('.timer-title.left').textContent,
+                    page.querySelector('.timer-title.right').textContent
+                ];
+                timerConfig.values = [
+                    page.querySelector('.timer.left').textContent,
+                    page.querySelector('.timer.right').textContent
+                ];
+            } else {
+                timerConfig.titles = [page.querySelector('.timer-title').textContent];
+                timerConfig.values = [page.querySelector('.timer').textContent];
+            }
         }
 
         config.push(timerConfig);
@@ -593,6 +602,9 @@ function applyConfiguration(config) {
             const rightTime = timerConfig.values[1].split(':').map(Number);
             timerPage.leftTimer.seconds = leftTime[0] * 60 + leftTime[1];
             timerPage.rightTimer.seconds = rightTime[0] * 60 + rightTime[1];
+        } else if (timerConfig.type === 'test-sound') {
+            const testSoundPage = createTestSoundPage();
+            timerContainer.appendChild(testSoundPage);
         }
     });
 
