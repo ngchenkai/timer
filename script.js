@@ -30,10 +30,13 @@ function startTimer(index) {
             if (timers[index].seconds > 0) {
                 timers[index].seconds--;
                 updateDisplay(index);
-            } else {
-                clearInterval(timers[index].interval);
-                timers[index].isRunning = false;
-                alert(`Timer ${index + 1} finished!`);
+                if (timers[index].seconds === 30) {
+                    playSound('/timer/timer-30sec.mp3');
+                } else if (timers[index].seconds === 0) {
+                    playSound('/timer/timer-end.mp3');
+                    clearInterval(timers[index].interval);
+                    timers[index].isRunning = false;
+                }
             }
         }, 1000);
     }
@@ -131,14 +134,18 @@ function createSideBySideTimerPage() {
                 if (timer.seconds > 0) {
                     timer.seconds--;
                     updateDisplay(timer, side);
-                } else {
-                    clearInterval(timer.interval);
-                    timer.isRunning = false;
-                    // Start the other timer automatically
-                    if (side === 'left') {
-                        startTimer(rightTimer, 'right');
-                    } else {
-                        startTimer(leftTimer, 'left');
+                    if (timer.seconds === 30) {
+                        playSound('/timer/timer-30sec.mp3');
+                    } else if (timer.seconds === 0) {
+                        playSound('/timer/timer-end.mp3');
+                        clearInterval(timer.interval);
+                        timer.isRunning = false;
+                        // Start the other timer automatically
+                        if (side === 'left') {
+                            startTimer(rightTimer, 'right');
+                        } else {
+                            startTimer(leftTimer, 'left');
+                        }
                     }
                 }
             }, 1000);
@@ -244,9 +251,13 @@ function createSideBySideTimerWithoutReverse() {
                 if (timer.seconds > 0) {
                     timer.seconds--;
                     updateDisplay(timer, side);
-                } else {
-                    clearInterval(timer.interval);
-                    timer.isRunning = false;
+                    if (timer.seconds === 30) {
+                        playSound('/timer/timer-30sec.mp3');
+                    } else if (timer.seconds === 0) {
+                        playSound('/timer/timer-end.mp3');
+                        clearInterval(timer.interval);
+                        timer.isRunning = false;
+                    }
                 }
             }, 1000);
         }
@@ -633,4 +644,9 @@ function createTestSoundPage() {
     });
 
     return testSoundPage;
+}
+
+function playSound(soundFile) {
+    const audio = new Audio(soundFile);
+    audio.play();
 }
