@@ -34,10 +34,10 @@ body {
 .timer {
     font-size: 6rem;
     font-weight: 200;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0); /* Changed to fully transparent */
     padding: 20px;
     border-radius: 15px;
-    backdrop-filter: blur(5px);
+    /* Removed backdrop-filter */
 }
 
 /* Styles for the control buttons container */
@@ -205,10 +205,10 @@ body {
 /* Styles for timer display in side-by-side layout */
 .timer-page.side-by-side .timer {
     font-size: 4.6rem;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0); /* Changed to fully transparent */
     padding: 23px;
     border-radius: 17px;
-    backdrop-filter: blur(5px);
+    /* Removed backdrop-filter */
 }
 
 /* Styles for controls in side-by-side layout */
@@ -269,10 +269,10 @@ body {
     font-size: 2rem;
     font-weight: 300;
     margin-bottom: 20px;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0); /* Changed to fully transparent */
     padding: 10px 20px;
     border-radius: 10px;
-    backdrop-filter: blur(5px);
+    /* Removed backdrop-filter */
     text-align: center;
     max-width: 80%;
     word-wrap: break-word;
@@ -282,7 +282,7 @@ body {
 .timer-page.side-by-side .timer-title {
     font-size: 1.725rem;
     margin-bottom: 11.5px;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0); /* Changed to fully transparent */
     padding: 5.75px 11.5px;
     border-radius: 5.75px;
     text-align: center;
@@ -315,7 +315,7 @@ body {
     display: flex;
     flex-direction: row;
     gap: 20px;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0);
     padding: 20px;
     border-radius: 15px;
     backdrop-filter: blur(5px);
