@@ -478,6 +478,9 @@ function initialize() {
         scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
         toggleMenu(false);
     });
+
+    // Add this code to load the default background image
+    loadDefaultBackgroundImage();
 }
 
 // Call initialize when the DOM is fully loaded
@@ -708,4 +711,32 @@ function createTestSoundPage() {
 function playSound(soundFile) {
     const audio = new Audio(soundFile);
     audio.play();
+}
+
+// New function to load the default background image
+function loadDefaultBackgroundImage() {
+    const imagePaths = ['background.jpg', 'background.png'];
+    
+    function tryLoadImage(index) {
+        if (index >= imagePaths.length) {
+            console.log('No default background image found');
+            return;
+        }
+
+        const img = new Image();
+        img.onload = function() {
+            document.body.style.backgroundImage = `url('${imagePaths[index]}')`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundRepeat = 'no-repeat';
+            document.body.style.backgroundAttachment = 'fixed';
+            console.log('Default background image set successfully');
+        };
+        img.onerror = function() {
+            tryLoadImage(index + 1);
+        };
+        img.src = imagePaths[index];
+    }
+
+    tryLoadImage(0);
 }
