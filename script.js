@@ -382,41 +382,6 @@ function addTimer() {
     scrollToTimer(index);
 }
 
-// Timer management: Set background image
-function setBackgroundImage() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    document.body.style.backgroundImage = `url('${img.src}')`;
-                    document.body.style.backgroundSize = 'cover';
-                    document.body.style.backgroundPosition = 'center';
-                    document.body.style.backgroundRepeat = 'no-repeat';
-                    document.body.style.backgroundAttachment = 'fixed';
-                    console.log('Background image set successfully');
-                };
-                img.onerror = function() {
-                    console.error('Error loading image');
-                };
-                img.src = e.target.result;
-            };
-            reader.onerror = function() {
-                console.error('Error reading file');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            console.log('No file selected');
-        }
-    };
-    input.click();
-}
-
 // Menu: Toggle menu visibility
 function toggleMenu(force) {
     const hamburgerMenu = document.getElementById('hamburgerMenu');
@@ -444,10 +409,6 @@ function initialize() {
         document.getElementById('timerContainer').appendChild(timerPage);
         updatePageIndicator();
         scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
-        toggleMenu(false);
-    });
-    document.getElementById('addBackgroundBtn').addEventListener('click', () => {
-        setBackgroundImage();
         toggleMenu(false);
     });
     document.getElementById('openMenuBtn').addEventListener('click', () => toggleMenu());
@@ -478,9 +439,6 @@ function initialize() {
         scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
         toggleMenu(false);
     });
-
-    // Add this code to load the default background image
-    loadDefaultBackgroundImage();
 }
 
 // Call initialize when the DOM is fully loaded
@@ -713,30 +671,27 @@ function playSound(soundFile) {
     audio.play();
 }
 
-// New function to load the default background image
-function loadDefaultBackgroundImage() {
-    const imagePaths = ['background.jpg', 'background.png'];
+// Function to set the background image from a file
+function setBackgroundImageFromFile(file) {
+    const reader = new FileReader();
     
-    function tryLoadImage(index) {
-        if (index >= imagePaths.length) {
-            console.log('No default background image found');
-            return;
-        }
-
-        const img = new Image();
-        img.onload = function() {
-            document.body.style.backgroundImage = `url('${imagePaths[index]}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundRepeat = 'no-repeat';
-            document.body.style.backgroundAttachment = 'fixed';
-            console.log('Default background image set successfully');
-        };
-        img.onerror = function() {
-            tryLoadImage(index + 1);
-        };
-        img.src = imagePaths[index];
-    }
-
-    tryLoadImage(0);
+    reader.onload = function(e) {
+        document.body.style.backgroundImage = `url(${e.target.result})`;
+    };
+    
+    reader.readAsDataURL(file);
 }
+
+// Event listener for the background button
+document.getElementById('addBackgroundBtn').addEventListener('click', function() {
+    document.getElementById('backgroundImageInput').click();
+});
+
+// Event listener for file input
+document.getElementById('backgroundImageInput').addEventListener('change', function() {
+    const file = this.files[0];
+    
+    if (file) {
+        setBackgroundImageFromFile(file);
+    }
+});
