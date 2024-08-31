@@ -638,20 +638,13 @@ function restorePages(config) {
         // Create the page based on its type
         if (pageConfig.type === 'single') {
             page = createTimerPage();
-            page.querySelector('.timer').textContent = pageConfig.timers[0];
-            page.querySelector('.timer-title').textContent = pageConfig.titles[0];
+            restoreSingleTimerPage(page, pageConfig);
         } else if (pageConfig.type === 'side-by-side-with-switch') {
             page = createSideBySideTimerPage();
-            page.querySelector('.timer.left').textContent = pageConfig.timers[0];
-            page.querySelector('.timer.right').textContent = pageConfig.timers[1];
-            page.querySelector('.timer-title.left').textContent = pageConfig.titles[0];
-            page.querySelector('.timer-title.right').textContent = pageConfig.titles[1];
+            restoreSideBySideTimerPage(page, pageConfig, true);
         } else if (pageConfig.type === 'side-by-side-without-switch') {
             page = createSideBySideTimerWithoutReverse();
-            page.querySelector('.timer.left').textContent = pageConfig.timers[0];
-            page.querySelector('.timer.right').textContent = pageConfig.timers[1];
-            page.querySelector('.timer-title.left').textContent = pageConfig.titles[0];
-            page.querySelector('.timer-title.right').textContent = pageConfig.titles[1];
+            restoreSideBySideTimerPage(page, pageConfig, false);
         } else if (pageConfig.type === 'soundTest') {
             page = createTestSoundPage();
             // No timers to restore for the sound test page
@@ -660,6 +653,190 @@ function restorePages(config) {
         timerContainer.appendChild(page);
     });
 }
+
+// Restore a single timer page
+function restoreSingleTimerPage(page, config) {
+    let seconds = parseTime(config.timers[0]);
+    let isRunning = false;
+    let interval;
+
+    const updateDisplay = () => {
+        page.querySelector('.timer').textContent = formatTime(seconds);
+    };
+
+    const startTimer = () => {
+        if (!isRunning && seconds > 0) {
+            isRunning = true;
+            interval = setInterval(() => {
+                if (seconds > 0) {
+                    seconds--;
+                    updateDisplay();
+                    if (seconds === 30) {
+                        playSound('/timer/timer-30sec.mp3');
+                    } else if (seconds === 0) {
+                        playSound('/timer/timer-end.mp3');
+                        clearInterval(interval);
+                        isRunning = false;
+                    }
+                }
+            }, 1000);
+        }
+    };
+
+    const pauseTimer = () => {
+        clearInterval(interval);
+        isRunning = false;
+    };
+
+    const resetTimer = () => {
+        clearInterval(interval);
+        isRunning = false;
+        seconds = 0;
+        updateDisplay();
+    };
+
+    page.querySelector('.timer').textContent = formatTime(seconds);
+    page.querySelector('.timer-title').textContent = config.titles[0];
+
+    // Re-attach the event listeners
+    page.querySelector('.startBtn').addEventListener('click', startTimer);
+    page.querySelector('.pauseBtn').addEventListener('click', pauseTimer);
+    page.querySelector('.resetBtn').addEventListener('click', resetTimer);
+
+    page.querySelector('.timer').addEventListener('input', (e) => {
+        const time = e.target.textContent.split(':').map(Number);
+        seconds = (time[0] || 0) * 60 + (time[1] || 0);
+    });
+}
+
+// Restore a side-by-side timer page (with or without switch)
+// Restore a side-by-side timer page (with or without switch)
+function restoreSideBySideTimerPage(page, config, hasSwitch) {
+    const leftTimer = { seconds: parseTime(config.timers[0]), isRunning: false, interval: null };
+    const rightTimer = { seconds: parseTime(config.timers[1]), isRunning: false, interval: null };
+
+    const updateDisplay = (timer, side) => {
+        page.querySelector(`.timer.${side}`).textContent = formatTime(timer.seconds);
+    };
+
+    const startTimer = (timer, side) => {
+        if (!timer.isRunning && timer.seconds > 0) {
+            timer.isRunning = true;
+            timer.interval = setInterval(() => {
+                if (timer.seconds > 0) {
+                    timer.seconds--;
+                    updateDisplay(timer, side);
+                    if (timer.seconds === 30) {
+                        playSound('/timer/timer-30sec.mp3');
+                    } else if (timer.seconds === 0) {
+                        playSound('/timer/timer-end.mp3');
+                        clearInterval(timer.interval);
+                        timer.isRunning = false;
+                        if (hasSwitch && side === 'left') {
+                            startTimer(rightTimer, 'right');
+                        } else if (hasSwitch && side === 'right') {
+                            startTimer(leftTimer, 'left');
+                        }
+                    }
+                }
+            }, 1000);
+            if (hasSwitch) hideDirectionButtons(page);
+        }
+    };
+
+    const stopTimer = (timer) => {
+        clearInterval(timer.interval);
+        timer.isRunning = false;
+    };
+
+    const resetTimers = () => {
+        [leftTimer, rightTimer].forEach((timer, index) => {
+            stopTimer(timer);
+            timer.seconds = 0;
+            updateDisplay(timer, index === 0 ? 'left' : 'right');
+        });
+        if (hasSwitch) showDirectionButtons(page);
+    };
+
+    const reverseTimers = () => {
+        if (leftTimer.isRunning) {
+            stopTimer(leftTimer);
+            startTimer(rightTimer, 'right');
+        } else if (rightTimer.isRunning) {
+            stopTimer(rightTimer);
+            startTimer(leftTimer, 'left');
+        }
+    };
+
+    page.querySelector('.timer.left').textContent = formatTime(leftTimer.seconds);
+    page.querySelector('.timer.right').textContent = formatTime(rightTimer.seconds);
+    page.querySelector('.timer-title.left').textContent = config.titles[0];
+    page.querySelector('.timer-title.right').textContent = config.titles[1];
+
+    const controls = page.querySelector('.controls');
+    const leftBtn = controls.querySelector('.leftBtn');
+    const reverseBtn = hasSwitch ? controls.querySelector('.reverseBtn') : null;
+    const pauseBtn = controls.querySelector('.pauseBtn');
+    const resetBtn = controls.querySelector('.resetBtn');
+    const rightBtn = controls.querySelector('.rightBtn');
+
+    // Attach event listeners
+    leftBtn.addEventListener('click', () => startTimer(leftTimer, 'left'));
+    if (hasSwitch && reverseBtn) {
+        reverseBtn.addEventListener('click', reverseTimers);
+    }
+    pauseBtn.addEventListener('click', () => {
+        stopTimer(leftTimer);
+        stopTimer(rightTimer);
+        if (hasSwitch) showDirectionButtons(page);
+    });
+    resetBtn.addEventListener('click', resetTimers);
+    rightBtn.addEventListener('click', () => startTimer(rightTimer, 'right'));
+
+    page.querySelectorAll('.timer').forEach((timerElement, index) => {
+        timerElement.addEventListener('input', (e) => {
+            const time = e.target.textContent.split(':').map(Number);
+            const timer = index === 0 ? leftTimer : rightTimer;
+            timer.seconds = (time[0] || 0) * 60 + (time[1] || 0);
+            updateDisplay(timer, index === 0 ? 'left' : 'right');
+        });
+    });
+
+    page.leftTimer = leftTimer;
+    page.rightTimer = rightTimer;
+}
+
+
+function reverseTimers(leftTimer, rightTimer, page) {
+    stopTimer(leftTimer); // Ensure the currently running timer is stopped before switching
+    stopTimer(rightTimer);
+    
+    if (leftTimer.isRunning) {
+        stopTimer(leftTimer);
+        startTimer(rightTimer, 'right');
+    } else if (rightTimer.isRunning) {
+        stopTimer(rightTimer);
+        startTimer(leftTimer, 'left');
+    }
+}
+
+function hideDirectionButtons(page) {
+    const controls = page.querySelector('.controls');
+    controls.querySelector('.leftBtn').style.display = 'none';
+    controls.querySelector('.rightBtn').style.display = 'none';
+}
+
+function showDirectionButtons(page) {
+    const controls = page.querySelector('.controls');
+    controls.querySelector('.leftBtn').style.display = '';
+    controls.querySelector('.rightBtn').style.display = '';
+}
+
+function parseTime(timeStr) {
+    const [minutes, seconds] = timeStr.split(':').map(Number);
+    return minutes * 60 + seconds;
+}
+
 
 /////////////////////////////////
 // SAVE AND LOAD CONFIGURATION //
