@@ -2,14 +2,6 @@ let timers = [];
 let currentPage = 0;
 let observer;
 
-function createTimer() {
-    return {
-        seconds: 0,
-        isRunning: false,
-        interval: null
-    };
-}
-
 function formatTime(totalSeconds) {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
@@ -23,6 +15,9 @@ function updateDisplay(index) {
     }
 }
 
+//////////////////////
+// CREATE NEW PAGES //
+//////////////////////
 // Create single timer page
 function createTimerPage() {
     // Create the main container for the timer page
@@ -105,7 +100,6 @@ function createTimerPage() {
 
     return timerPage;
 }
-
 
 // Side-by-side timer: Create timer page
 function createSideBySideTimerPage() {
@@ -401,6 +395,18 @@ function createTestSoundPage() {
     return testSoundPage;
 }
 
+// Timer management: Add single timer when site is loaded
+function addTimer() {
+    const index = document.querySelectorAll('.timer-page').length;
+    const timerPage = createTimerPage(index);
+    document.getElementById('timerContainer').appendChild(timerPage);
+    updatePageIndicator();
+    scrollToTimer(index);
+}
+//////////////////////
+// CREATE NEW PAGES //
+//////////////////////
+
 // Navigation: Update page indicator
 function updatePageIndicator() {
     const pageIndicator = document.getElementById('pageIndicator');
@@ -428,15 +434,7 @@ function scrollToTimer(index) {
     }
 }
 
-// Timer management: Add new timer
-function addTimer() {
-    const index = document.querySelectorAll('.timer-page').length;
-    const timerPage = createTimerPage(index);
-    document.getElementById('timerContainer').appendChild(timerPage);
-    timers.push(createTimer());
-    updatePageIndicator();
-    scrollToTimer(index);
-}
+
 
 // Menu: Toggle menu visibility
 function toggleMenu(force) {
