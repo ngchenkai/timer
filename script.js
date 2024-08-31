@@ -434,8 +434,6 @@ function scrollToTimer(index) {
     }
 }
 
-
-
 // Menu: Toggle menu visibility
 function toggleMenu(force) {
     const hamburgerMenu = document.getElementById('hamburgerMenu');
@@ -566,6 +564,10 @@ function addSideBySideTimer() {
     scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
 }
 
+/////////////////////////////////
+// SAVE AND LOAD CONFIGURATION //
+/////////////////////////////////
+
 function saveConfiguration() {
     const pages = document.querySelectorAll('.timer-page');
     const config = [];
@@ -573,21 +575,27 @@ function saveConfiguration() {
     pages.forEach(page => {
         const pageType = page.dataset.type;
         const timers = [];
-        
-        // Collecting timer values based on the type
+        const titles = [];
+
+        // Collecting timer values and titles based on the type
         page.querySelectorAll('.timer').forEach(timer => {
             timers.push(timer.textContent.trim());
+        });
+        page.querySelectorAll('.timer-title').forEach(title => {
+            titles.push(title.textContent.trim());
         });
 
         config.push({
             type: pageType,
-            timers: timers
+            timers: timers,
+            titles: titles
         });
     });
 
     const configJSON = JSON.stringify(config);
     downloadJSON(configJSON, 'timer-config.json');
 }
+
 
 function downloadJSON(json, filename) {
     const blob = new Blob([json], { type: 'application/json' });
@@ -626,27 +634,49 @@ function restorePages(config) {
 
     config.forEach(pageConfig => {
         let page;
-        
+
         // Create the page based on its type
         if (pageConfig.type === 'single') {
             page = createTimerPage();
+            page.querySelector('.timer').textContent = pageConfig.timers[0];
+            page.querySelector('.timer-title').textContent = pageConfig.titles[0];
         } else if (pageConfig.type === 'side-by-side-with-switch') {
             page = createSideBySideTimerPage();
+            page.querySelector('.timer.left').textContent = pageConfig.timers[0];
+            page.querySelector('.timer.right').textContent = pageConfig.timers[1];
+            page.querySelector('.timer-title.left').textContent = pageConfig.titles[0];
+            page.querySelector('.timer-title.right').textContent = pageConfig.titles[1];
         } else if (pageConfig.type === 'side-by-side-without-switch') {
             page = createSideBySideTimerWithoutReverse();
+            page.querySelector('.timer.left').textContent = pageConfig.timers[0];
+            page.querySelector('.timer.right').textContent = pageConfig.timers[1];
+            page.querySelector('.timer-title.left').textContent = pageConfig.titles[0];
+            page.querySelector('.timer-title.right').textContent = pageConfig.titles[1];
         } else if (pageConfig.type === 'soundTest') {
-            page = createSoundTestPage();
+            page = createTestSoundPage();
+            // No timers to restore for the sound test page
         }
 
         timerContainer.appendChild(page);
     });
 }
 
-// Audio: Play sound
+/////////////////////////////////
+// SAVE AND LOAD CONFIGURATION //
+/////////////////////////////////
+
+/////////////////////
+// AUDIO FUNCTIONS //
+/////////////////////
+
 function playSound(soundFile) {
     const audio = new Audio(soundFile);
     audio.play();
 }
+
+/////////////////////
+// AUDIO FUNCTIONS //
+/////////////////////
 
 // Function to set the background image from a file
 function setBackgroundImageFromFile(file) {
