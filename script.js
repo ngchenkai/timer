@@ -29,13 +29,13 @@ function createTimerPage() {
     
     // Set up the HTML structure for the timer page
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <button class="deleteBtn" title="删除">&times;</button>
         <div class="timer-title" contenteditable="true">Timer</div>
         <div class="timer" contenteditable="true">00:00</div>
         <div class="controls">
-            <button class="startBtn" title="Start Timer"><i class="fas fa-play"></i></button>
-            <button class="pauseBtn" title="Pause Timer"><i class="fas fa-pause"></i></button>
-            <button class="resetBtn" title="Reset Timer"><i class="fas fa-undo"></i></button>
+            <button class="startBtn" title="开始"><i class="fas fa-play"></i></button>
+            <button class="pauseBtn" title="暂停"><i class="fas fa-pause"></i></button>
+            <button class="resetBtn" title="重置"><i class="fas fa-undo"></i></button>
         </div>
     `;
 
@@ -112,7 +112,7 @@ function createSideBySideTimerPage() {
     
     // Set up the HTML structure for the side-by-side timer page
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <button class="deleteBtn" title="删除">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
                 <div class="timer-title left" contenteditable="true">正方</div>
@@ -120,11 +120,11 @@ function createSideBySideTimerPage() {
             </div>
             <div class="controls-space">
                 <div class="controls">
-                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
-                    <button class="reverseBtn" title="Switch Active Timer"><i class="fas fa-sync"></i></button>
-                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
-                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
-                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+                    <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
+                    <button class="reverseBtn" title="切换"><i class="fas fa-sync"></i></button>
+                    <button class="pauseBtn" title="双方暂停"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="双方重置"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
             <div class="timer-right-space">
@@ -263,7 +263,7 @@ function createSideBySideTimerWithoutReverse() {
     
     // Set up the HTML structure for the side-by-side timer page without reverse
     timerPage.innerHTML = `
-        <button class="deleteBtn" title="Delete Timer">&times;</button>
+        <button class="deleteBtn" title="删除">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
                 <div class="timer-title left" contenteditable="true">Left Timer</div>
@@ -271,10 +271,10 @@ function createSideBySideTimerWithoutReverse() {
             </div>
             <div class="controls-space">
                 <div class="controls">
-                    <button class="leftBtn" title="Start Left Timer"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pauseBtn" title="Pause Both Timers"><i class="fas fa-pause"></i></button>
-                    <button class="resetBtn" title="Reset Both Timers"><i class="fas fa-undo"></i></button>
-                    <button class="rightBtn" title="Start Right Timer"><i class="fas fa-chevron-right"></i></button>
+                    <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pauseBtn" title="双方暂停"><i class="fas fa-pause"></i></button>
+                    <button class="resetBtn" title="双方重置"><i class="fas fa-undo"></i></button>
+                    <button class="rightBtn" title="反方开始"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
             <div class="timer-right-space">
@@ -373,7 +373,7 @@ function createTestSoundPage() {
     const testSoundPage = document.createElement('div');
     testSoundPage.className = 'timer-page test-sound-page';
     testSoundPage.innerHTML = `
-        <button class="deleteBtn" title="Delete Page">&times;</button>
+        <button class="deleteBtn" title="删除">&times;</button>
         <div class="test-sound-container">
             <button class="test-sound-btn" data-sound="/timer/timer-30sec.mp3">30 Sec Sound</button>
             <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">End Sound</button>
