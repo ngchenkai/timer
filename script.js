@@ -23,42 +23,11 @@ function updateDisplay(index) {
     }
 }
 
-function startTimer(index) {
-    if (!timers[index].isRunning) {
-        timers[index].isRunning = true;
-        timers[index].interval = setInterval(() => {
-            if (timers[index].seconds > 0) {
-                timers[index].seconds--;
-                updateDisplay(index);
-                if (timers[index].seconds === 30) {
-                    playSound('/timer/timer-30sec.mp3');
-                } else if (timers[index].seconds === 0) {
-                    playSound('/timer/timer-end.mp3');
-                    clearInterval(timers[index].interval);
-                    timers[index].isRunning = false;
-                }
-            }
-        }, 1000);
-    }
-}
-
-function pauseTimer(index) {
-    clearInterval(timers[index].interval);
-    timers[index].isRunning = false;
-}
-
-function resetTimer(index) {
-    clearInterval(timers[index].interval);
-    timers[index].isRunning = false;
-    timers[index].seconds = 0;
-    updateDisplay(index);
-}
-
-function createTimerPage(index) {
+// Create single timer page
+function createTimerPage() {
     // Create the main container for the timer page
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page';
-    timerPage.dataset.index = index;
 
     // Specify the type of timer page for saveConfiguration
     timerPage.dataset.type = 'single';
@@ -66,7 +35,7 @@ function createTimerPage(index) {
     // Set up the HTML structure for the timer page
     timerPage.innerHTML = `
         <button class="deleteBtn" title="Delete Timer">&times;</button>
-        <div class="timer-title" contenteditable="true">Timer ${index + 1}</div>
+        <div class="timer-title" contenteditable="true">Timer</div>
         <div class="timer" contenteditable="true">00:00</div>
         <div class="controls">
             <button class="startBtn" title="Start Timer"><i class="fas fa-play"></i></button>
@@ -75,20 +44,68 @@ function createTimerPage(index) {
         </div>
     `;
 
+    let seconds = 0;
+    let isRunning = false;
+    let interval;
+
+    // Function to update the timer display
+    function updateDisplay() {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        timerPage.querySelector('.timer').textContent = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    }
+
+    // Function to start the timer
+    function startTimer() {
+        if (!isRunning) {
+            isRunning = true;
+            interval = setInterval(() => {
+                if (seconds > 0) {
+                    seconds--;
+                    updateDisplay();
+                    if (seconds === 30) {
+                        playSound('/timer/timer-30sec.mp3');
+                    } else if (seconds === 0) {
+                        playSound('/timer/timer-end.mp3');
+                        clearInterval(interval);
+                        isRunning = false;
+                    }
+                }
+            }, 1000);
+        }
+    }
+
+    // Function to pause the timer
+    function pauseTimer() {
+        clearInterval(interval);
+        isRunning = false;
+    }
+
+    // Function to reset the timer
+    function resetTimer() {
+        clearInterval(interval);
+        isRunning = false;
+        seconds = 0;
+        updateDisplay();
+    }
+
+    // Add event listener for deleting the timer
+    timerPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(timerPage));
+
     // Add event listeners for timer controls
-    timerPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(index));
-    timerPage.querySelector('.startBtn').addEventListener('click', () => startTimer(index));
-    timerPage.querySelector('.pauseBtn').addEventListener('click', () => pauseTimer(index));
-    timerPage.querySelector('.resetBtn').addEventListener('click', () => resetTimer(index));
+    timerPage.querySelector('.startBtn').addEventListener('click', startTimer);
+    timerPage.querySelector('.pauseBtn').addEventListener('click', pauseTimer);
+    timerPage.querySelector('.resetBtn').addEventListener('click', resetTimer);
     
     // Add event listener for manual time input
     timerPage.querySelector('.timer').addEventListener('input', (e) => {
         const time = e.target.textContent.split(':').map(Number);
-        timers[index].seconds = time[0] * 60 + time[1];
+        seconds = time[0] * 60 + time[1];
     });
 
     return timerPage;
 }
+
 
 // Side-by-side timer: Create timer page
 function createSideBySideTimerPage() {
@@ -357,6 +374,33 @@ function createSideBySideTimerWithoutReverse() {
     return timerPage;
 }
 
+// Test sound page: Create test sound page
+function createTestSoundPage() {
+    const testSoundPage = document.createElement('div');
+    testSoundPage.className = 'timer-page test-sound-page';
+    testSoundPage.innerHTML = `
+        <button class="deleteBtn" title="Delete Page">&times;</button>
+        <div class="test-sound-container">
+            <button class="test-sound-btn" data-sound="/timer/timer-30sec.mp3">30 Sec Sound</button>
+            <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">End Sound</button>
+        </div>
+    `;
+
+    // Specify the type of timer page for saveConfiguration
+    testSoundPage.dataset.type = 'soundTest';
+
+    testSoundPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(testSoundPage));
+
+    testSoundPage.querySelectorAll('.test-sound-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const audio = new Audio(btn.dataset.sound);
+            audio.play();
+        });
+    });
+
+    return testSoundPage;
+}
+
 // Navigation: Update page indicator
 function updatePageIndicator() {
     const pageIndicator = document.getElementById('pageIndicator');
@@ -598,33 +642,6 @@ function restorePages(config) {
 
         timerContainer.appendChild(page);
     });
-}
-
-// Test sound page: Create test sound page
-function createTestSoundPage() {
-    const testSoundPage = document.createElement('div');
-    testSoundPage.className = 'timer-page test-sound-page';
-    testSoundPage.innerHTML = `
-        <button class="deleteBtn" title="Delete Page">&times;</button>
-        <div class="test-sound-container">
-            <button class="test-sound-btn" data-sound="/timer/timer-30sec.mp3">30 Sec Sound</button>
-            <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">End Sound</button>
-        </div>
-    `;
-
-    // Specify the type of timer page for saveConfiguration
-    testSoundPage.dataset.type = 'soundTest';
-
-    testSoundPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(testSoundPage));
-
-    testSoundPage.querySelectorAll('.test-sound-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const audio = new Audio(btn.dataset.sound);
-            audio.play();
-        });
-    });
-
-    return testSoundPage;
 }
 
 // Audio: Play sound
