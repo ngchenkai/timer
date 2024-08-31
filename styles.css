@@ -77,6 +77,7 @@ body {
 
 /* Styles for the hamburger menu */
 .hamburger-menu {
+    position: relative;
     position: fixed;
     left: -250px;
     top: 0;
@@ -87,6 +88,15 @@ body {
     z-index: 2000;
     padding: 20px;
     box-sizing: border-box;
+}
+
+.hamburger-footer {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    font-size: 14px; /* Adjust the font size as needed */
+    color: black; /* Adjust the color as needed */
+    padding: 10px 0;
 }
 
 /* Class to open the hamburger menu */
