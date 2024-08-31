@@ -264,6 +264,9 @@ function createSideBySideTimerWithoutReverse() {
         </div>
     `;
 
+    // Add event listener for deleting the timer
+    timerPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(timerPage));
+
     // Initialize left and right timers
     const leftTimer = { seconds: 0, isRunning: false, interval: null };
     const rightTimer = { seconds: 0, isRunning: false, interval: null };
