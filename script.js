@@ -59,6 +59,9 @@ function createTimerPage(index) {
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page';
     timerPage.dataset.index = index;
+
+    // Specify the type of timer page for saveConfiguration
+    timerPage.dataset.type = 'single';
     
     // Set up the HTML structure for the timer page
     timerPage.innerHTML = `
@@ -92,6 +95,9 @@ function createSideBySideTimerPage() {
     // Create the main container for the side-by-side timer page
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side';
+
+    // Specify the type of timer page for saveConfiguration
+    timerPage.dataset.type = 'side-by-side-with-switch';
     
     // Set up the HTML structure for the side-by-side timer page
     timerPage.innerHTML = `
@@ -240,6 +246,9 @@ function createSideBySideTimerWithoutReverse() {
     // Create the main container for the side-by-side timer page without reverse
     const timerPage = document.createElement('div');
     timerPage.className = 'timer-page side-by-side without-reverse';
+
+    // Specify the type of timer page for saveConfiguration
+    timerPage.dataset.type = 'side-by-side-without-switch';
     
     // Set up the HTML structure for the side-by-side timer page without reverse
     timerPage.innerHTML = `
@@ -515,133 +524,80 @@ function addSideBySideTimer() {
     scrollToTimer(document.querySelectorAll('.timer-page').length - 1);
 }
 
-// Configuration: Save configuration
 function saveConfiguration() {
-    const timerPages = document.querySelectorAll('.timer-page');
+    const pages = document.querySelectorAll('.timer-page');
     const config = [];
 
-    timerPages.forEach((page, index) => {
-        const isSideBySide = page.classList.contains('side-by-side');
-        const isWithoutReverse = page.classList.contains('without-reverse');
-        const isTestSound = page.classList.contains('test-sound-page');
-        let timerConfig;
+    pages.forEach(page => {
+        const pageType = page.dataset.type;
+        const timers = [];
+        
+        // Collecting timer values based on the type
+        page.querySelectorAll('.timer').forEach(timer => {
+            timers.push(timer.textContent.trim());
+        });
 
-        if (isTestSound) {
-            timerConfig = {
-                type: 'test-sound'
-            };
-        } else {
-            timerConfig = {
-                type: isSideBySide ? (isWithoutReverse ? 'side-by-side-without-reverse' : 'side-by-side') : 'single',
-                titles: [],
-                values: []
-            };
-
-            if (isSideBySide) {
-                timerConfig.titles = [
-                    page.querySelector('.timer-title.left').textContent,
-                    page.querySelector('.timer-title.right').textContent
-                ];
-                timerConfig.values = [
-                    page.querySelector('.timer.left').textContent,
-                    page.querySelector('.timer.right').textContent
-                ];
-            } else {
-                timerConfig.titles = [page.querySelector('.timer-title').textContent];
-                timerConfig.values = [page.querySelector('.timer').textContent];
-            }
-        }
-
-        config.push(timerConfig);
+        config.push({
+            type: pageType,
+            timers: timers
+        });
     });
 
-    const jsonConfig = JSON.stringify(config, null, 2);
-    const blob = new Blob([jsonConfig], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'timer_configuration.json';
-    a.click();
-    URL.revokeObjectURL(url);
+    const configJSON = JSON.stringify(config);
+    downloadJSON(configJSON, 'timer-config.json');
 }
 
-// Configuration: Load configuration
+function downloadJSON(json, filename) {
+    const blob = new Blob([json], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 function loadConfiguration() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json';
-    input.onchange = function(event) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+
+    fileInput.onchange = (event) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const config = JSON.parse(e.target.result);
-                    applyConfiguration(config);
-                } catch (error) {
-                    console.error('Error parsing JSON:', error);
-                    alert('Invalid configuration file');
-                }
+                const config = JSON.parse(e.target.result);
+                restorePages(config);
             };
             reader.readAsText(file);
         }
     };
-    input.click();
+
+    fileInput.click();
 }
 
-// Configuration: Apply configuration
-function applyConfiguration(config) {
-    // Clear existing timers
+function restorePages(config) {
+    // Clear the existing pages
     const timerContainer = document.getElementById('timerContainer');
     timerContainer.innerHTML = '';
-    timers = [];
 
-    config.forEach((timerConfig, index) => {
-        // Single timer configuration
-        if (timerConfig.type === 'single') {
-            const timerPage = createTimerPage(index);
-            timerContainer.appendChild(timerPage);
-            timers.push(createTimer());
-
-            const titleElement = timerPage.querySelector('.timer-title');
-            const timerElement = timerPage.querySelector('.timer');
-            titleElement.textContent = timerConfig.titles[0];
-            timerElement.textContent = timerConfig.values[0];
-
-            // Update the timer object
-            const time = timerConfig.values[0].split(':').map(Number);
-            timers[index].seconds = time[0] * 60 + time[1];
-        } 
-        // Side-by-side timer configuration (with or without reverse)
-        else if (timerConfig.type === 'side-by-side' || timerConfig.type === 'side-by-side-without-reverse') {
-            const timerPage = timerConfig.type === 'side-by-side' ? 
-                createSideBySideTimerPage() : createSideBySideTimerWithoutReverse();
-            timerContainer.appendChild(timerPage);
-
-            const leftTitleElement = timerPage.querySelector('.timer-title.left');
-            const rightTitleElement = timerPage.querySelector('.timer-title.right');
-            const leftTimerElement = timerPage.querySelector('.timer.left');
-            const rightTimerElement = timerPage.querySelector('.timer.right');
-
-            leftTitleElement.textContent = timerConfig.titles[0];
-            rightTitleElement.textContent = timerConfig.titles[1];
-            leftTimerElement.textContent = timerConfig.values[0];
-            rightTimerElement.textContent = timerConfig.values[1];
-
-            const leftTime = timerConfig.values[0].split(':').map(Number);
-            const rightTime = timerConfig.values[1].split(':').map(Number);
-            timerPage.leftTimer.seconds = leftTime[0] * 60 + leftTime[1];
-            timerPage.rightTimer.seconds = rightTime[0] * 60 + rightTime[1];
-        } 
-        // Test sound page configuration
-        else if (timerConfig.type === 'test-sound') {
-            const testSoundPage = createTestSoundPage();
-            timerContainer.appendChild(testSoundPage);
+    config.forEach(pageConfig => {
+        let page;
+        
+        // Create the page based on its type
+        if (pageConfig.type === 'single') {
+            page = createTimerPage();
+        } else if (pageConfig.type === 'side-by-side-with-switch') {
+            page = createSideBySideTimerPage();
+        } else if (pageConfig.type === 'side-by-side-without-switch') {
+            page = createSideBySideTimerWithoutReverse();
+        } else if (pageConfig.type === 'soundTest') {
+            page = createSoundTestPage();
         }
-    });
 
-    updatePageIndicator();
-    scrollToTimer(0);
+        timerContainer.appendChild(page);
+    });
 }
 
 // Test sound page: Create test sound page
@@ -655,6 +611,9 @@ function createTestSoundPage() {
             <button class="test-sound-btn" data-sound="/timer/timer-end.mp3">End Sound</button>
         </div>
     `;
+
+    // Specify the type of timer page for saveConfiguration
+    testSoundPage.dataset.type = 'soundTest';
 
     testSoundPage.querySelector('.deleteBtn').addEventListener('click', () => deleteTimer(testSoundPage));
 
