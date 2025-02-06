@@ -206,6 +206,7 @@ body {
 .timer-page.side-by-side .controls-space {
     width: 30%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 0 10px;
@@ -279,10 +280,9 @@ body {
     font-size: 2rem;
     font-weight: 300;
     margin-bottom: 20px;
-    background-color: rgba(255, 255, 255, 0); /* Changed to fully transparent */
+    background-color: rgba(255, 255, 255, 0);
     padding: 10px 20px;
     border-radius: 10px;
-    /* Removed backdrop-filter */
     text-align: center;
     max-width: 80%;
     word-wrap: break-word;
@@ -354,4 +354,16 @@ body {
     .test-sound-container {
         flex-direction: column;
     }
+}
+
+/* Make main timer titles bold */
+.timer-page:not(.side-by-side) .timer-title,
+.timer-page.side-by-side .controls-space .timer-title {
+    font-weight: bold;
+}
+
+/* Keep side timer titles normal weight */
+.timer-page.side-by-side .timer-left-space .timer-title,
+.timer-page.side-by-side .timer-right-space .timer-title {
+    font-weight: 300;
 }

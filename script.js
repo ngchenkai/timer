@@ -30,7 +30,7 @@ function createTimerPage() {
     // Set up the HTML structure for the timer page
     timerPage.innerHTML = `
         <button class="deleteBtn" title="删除">&times;</button>
-        <div class="timer-title" contenteditable="true">Timer</div>
+        <div class="timer-title" contenteditable="true">环节</div>
         <div class="timer" contenteditable="true">00:00</div>
         <div class="controls">
             <button class="startBtn" title="开始"><i class="fas fa-play"></i></button>
@@ -119,6 +119,7 @@ function createSideBySideTimerPage() {
                 <div class="timer left" contenteditable="true">00:00</div>
             </div>
             <div class="controls-space">
+                <div class="timer-title" contenteditable="true">环节</div>
                 <div class="controls">
                     <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
                     <button class="reverseBtn" title="切换"><i class="fas fa-sync"></i></button>
@@ -266,10 +267,11 @@ function createSideBySideTimerWithoutReverse() {
         <button class="deleteBtn" title="删除">&times;</button>
         <div class="timer-container">
             <div class="timer-left-space">
-                <div class="timer-title left" contenteditable="true">Left Timer</div>
+                <div class="timer-title left" contenteditable="true">正方</div>
                 <div class="timer left" contenteditable="true">00:00</div>
             </div>
             <div class="controls-space">
+                <div class="timer-title" contenteditable="true">环节</div>
                 <div class="controls">
                     <button class="leftBtn" title="正方开始"><i class="fas fa-chevron-left"></i></button>
                     <button class="pauseBtn" title="双方暂停"><i class="fas fa-pause"></i></button>
@@ -278,7 +280,7 @@ function createSideBySideTimerWithoutReverse() {
                 </div>
             </div>
             <div class="timer-right-space">
-                <div class="timer-title right" contenteditable="true">Right Timer</div>
+                <div class="timer-title right" contenteditable="true">反方</div>
                 <div class="timer right" contenteditable="true">00:00</div>
             </div>
         </div>
@@ -578,12 +580,22 @@ function saveConfiguration() {
         const titles = [];
 
         // Collecting timer values and titles based on the type
-        page.querySelectorAll('.timer').forEach(timer => {
-            timers.push(timer.textContent.trim());
-        });
-        page.querySelectorAll('.timer-title').forEach(title => {
-            titles.push(title.textContent.trim());
-        });
+        if (pageType === 'single') {
+            timers.push(page.querySelector('.timer').textContent.trim());
+            titles.push(page.querySelector('.timer-title').textContent.trim());
+        } else if (pageType === 'side-by-side-with-switch' || pageType === 'side-by-side-without-switch') {
+            // Get left and right timer values
+            page.querySelectorAll('.timer').forEach(timer => {
+                timers.push(timer.textContent.trim());
+            });
+            
+            // Get all titles (main, left, right)
+            titles.push(page.querySelector('.controls-space .timer-title').textContent.trim()); // Main title
+            titles.push(page.querySelector('.timer-left-space .timer-title').textContent.trim()); // Left title
+            titles.push(page.querySelector('.timer-right-space .timer-title').textContent.trim()); // Right title
+        } else if (pageType === 'soundTest') {
+            // No timers or titles to save for sound test page
+        }
 
         config.push({
             type: pageType,
@@ -595,7 +607,6 @@ function saveConfiguration() {
     const configJSON = JSON.stringify(config);
     downloadJSON(configJSON, 'timer-config.json');
 }
-
 
 function downloadJSON(json, filename) {
     const blob = new Blob([json], { type: 'application/json' });
@@ -655,8 +666,8 @@ function restorePages(config) {
 }
 
 // Restore a single timer page
-function restoreSingleTimerPage(page, config) {
-    let seconds = parseTime(config.timers[0]);
+function restoreSingleTimerPage(page, pageConfig) {
+    let seconds = parseTime(pageConfig.timers[0]);
     let isRunning = false;
     let interval;
 
@@ -696,7 +707,7 @@ function restoreSingleTimerPage(page, config) {
     };
 
     page.querySelector('.timer').textContent = formatTime(seconds);
-    page.querySelector('.timer-title').textContent = config.titles[0];
+    page.querySelector('.timer-title').textContent = pageConfig.titles[0];
 
     // Re-attach the event listeners
     page.querySelector('.startBtn').addEventListener('click', startTimer);
@@ -710,10 +721,9 @@ function restoreSingleTimerPage(page, config) {
 }
 
 // Restore a side-by-side timer page (with or without switch)
-// Restore a side-by-side timer page (with or without switch)
-function restoreSideBySideTimerPage(page, config, hasSwitch) {
-    const leftTimer = { seconds: parseTime(config.timers[0]), isRunning: false, interval: null };
-    const rightTimer = { seconds: parseTime(config.timers[1]), isRunning: false, interval: null };
+function restoreSideBySideTimerPage(page, pageConfig, hasSwitch) {
+    const leftTimer = { seconds: parseTime(pageConfig.timers[0]), isRunning: false, interval: null };
+    const rightTimer = { seconds: parseTime(pageConfig.timers[1]), isRunning: false, interval: null };
 
     const updateDisplay = (timer, side) => {
         page.querySelector(`.timer.${side}`).textContent = formatTime(timer.seconds);
@@ -770,8 +780,9 @@ function restoreSideBySideTimerPage(page, config, hasSwitch) {
 
     page.querySelector('.timer.left').textContent = formatTime(leftTimer.seconds);
     page.querySelector('.timer.right').textContent = formatTime(rightTimer.seconds);
-    page.querySelector('.timer-title.left').textContent = config.titles[0];
-    page.querySelector('.timer-title.right').textContent = config.titles[1];
+    page.querySelector('.controls-space .timer-title').textContent = pageConfig.titles[0];
+    page.querySelector('.timer-left-space .timer-title').textContent = pageConfig.titles[1];
+    page.querySelector('.timer-right-space .timer-title').textContent = pageConfig.titles[2];
 
     const controls = page.querySelector('.controls');
     const leftBtn = controls.querySelector('.leftBtn');
@@ -806,7 +817,6 @@ function restoreSideBySideTimerPage(page, config, hasSwitch) {
     page.rightTimer = rightTimer;
 }
 
-
 function reverseTimers(leftTimer, rightTimer, page) {
     stopTimer(leftTimer); // Ensure the currently running timer is stopped before switching
     stopTimer(rightTimer);
@@ -836,11 +846,6 @@ function parseTime(timeStr) {
     const [minutes, seconds] = timeStr.split(':').map(Number);
     return minutes * 60 + seconds;
 }
-
-
-/////////////////////////////////
-// SAVE AND LOAD CONFIGURATION //
-/////////////////////////////////
 
 /////////////////////
 // AUDIO FUNCTIONS //
